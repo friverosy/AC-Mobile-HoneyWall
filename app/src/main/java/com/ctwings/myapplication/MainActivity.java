@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -69,17 +70,18 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int delay = 600000; // 4 Min. 240000; 600000 10 min
+    private final int delay = 60000; // 4 Min. 240000; 600000 10 min
     //private final String server = "http://controlid.multiexportfoods.com:3000";
     //private final String server = "http://controlid-test.multiexportfoods.com:3000";
     //private static String server = "http://192.168.2.77:3000"; // Sealand
     //private static String server = "http://192.168.43.231:3000"; // Axxezo
     //private static String server = "http://192.168.0.7:3000"; // House
     //private static String server = "http://10.0.0.69:3000";
-    //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:9000"; // Integration server
-    private static String server = "http://bm03.bluemonster.cl:9000"; // Integration server
-
-
+    private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:9000"; // Integration server
+    //private static String server = "http://bm03.bluemonster.cl:9000"; // Integration server
+    private static String idCompany;
+    private static String idSector;
+    private static String serialNumber = Build.SERIAL;
     private static String version = "f2fadba";
 
     private ImageView imageview;
@@ -139,6 +141,16 @@ public class MainActivity extends AppCompatActivity {
         loading = (ProgressWheel) findViewById(R.id.loading);
         loading.setVisibility(View.GONE);
 
+        //TODO tshen: this should be set reading a webservice
+        if(serialNumber.trim().equals("33b7ddaf")) {
+            idCompany = "585597684f6ad8244e26748e";
+            idSector = "5860838c3970532794a746b3";
+        } else {
+            //by default use these values
+            idCompany = "585597684f6ad8244e26748e";
+            idSector = "5860838c3970532794a746b3";
+        }
+
         writeLog("DEBUG", "Application has started Correctly");
         UpdateDb();
 
@@ -157,6 +169,8 @@ public class MainActivity extends AppCompatActivity {
         lastUpdated = (TextView) findViewById(R.id.textView_lastUpdate);
         textViewVersion = (TextView) findViewById(R.id.textView_version);
         textViewVersion.setText("Versión: " + version);
+
+
 
         new RetrieveTokenTask().execute();
 
@@ -180,10 +194,12 @@ public class MainActivity extends AppCompatActivity {
                 getPeople(editTextRun.getText().toString());
                 //new RetrieveTokenTask().execute();
                 //new LoadDbTask().execute();
-                //getPeople("14511293-1");
-
+                //getPeople("14511293-1")
             }
         });
+
+
+
 
     }
 
@@ -738,7 +754,7 @@ public class MainActivity extends AppCompatActivity {
             //return DbCall(server + "/api/people?filter[where][is_permitted]=true");
             //tshen: TODO: - figure out a way to retrieve the company id
             //             - change the name of the endpoint from "persons" to "people"
-            return DbCall(server + "/api/companies/585597684f6ad8244e26748e/persons");
+            return DbCall(server + "/api/companies/" + idCompany + "/persons");
             //return DbCall(server + "/api/persons");
 
         }
@@ -1098,7 +1114,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.accumulate("person", record.getMongoId());
 
             //jsonObject.accumulate("personType", record.getPerson_profile());
-            jsonObject.accumulate("sector", "5860838c3970532794a746b3");
+            jsonObject.accumulate("sector", idSector);
 
 //            if (record.getPerson_profile().equals("V")) {
 //                jsonObject.accumulate("is_permitted", true);
