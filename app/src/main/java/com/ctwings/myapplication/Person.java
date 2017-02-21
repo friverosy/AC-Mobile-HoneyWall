@@ -5,6 +5,7 @@ package com.ctwings.myapplication;
  */
 public class Person {
     int person_id;
+    String person_mongo_id;
     String person_fullname;
     String person_run;
     String person_is_permitted;
@@ -19,8 +20,9 @@ public class Person {
 
     }
 
-    public Person(String person_fullname, String person_run, String person_is_permitted, String person_company, String person_place, String person_company_code, Integer person_card, String person_profile){
+    public Person(String person_fullname, String person_mongo_id, String person_run, String person_is_permitted, String person_company, String person_place, String person_company_code, Integer person_card, String person_profile){
 
+        this.person_mongo_id = person_mongo_id;
         this.person_fullname = person_fullname;
         this.person_run = person_run;
         this.person_is_permitted = person_is_permitted;
@@ -34,6 +36,10 @@ public class Person {
     //Set
     public void set_person_id(int person_id) {
         this.person_id = person_id;
+    }
+
+    public void set_person_mongo_id(String person_mongo_id) {
+        this.person_mongo_id = person_mongo_id;
     }
 
     public void set_person_card(int person_card) {
@@ -75,6 +81,8 @@ public class Person {
         return this.person_id;
     }
 
+    public String get_person_mongo_id() { return this.person_mongo_id;}
+
     public int get_person_card() {
         return this.person_card;
     }
@@ -110,7 +118,7 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person [id=" + person_id + ", fullname=" + person_fullname + ", run=" +
+        return "Person [id=" + person_id + ", person_mongo_id=" + person_mongo_id + ",fullname=" + person_fullname + ", run=" +
                 person_run + ", is_permitted=" + person_is_permitted +
                 ", company=" + person_company + ", place=" + person_place +
                 ", company_code="+ person_company_code + ", card="+person_card+

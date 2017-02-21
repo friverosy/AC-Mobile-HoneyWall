@@ -69,7 +69,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int delay = 60000; // 4 Min. 240000; 600000 10 min
+    private final int delay = 600000; // 4 Min. 240000; 600000 10 min
     //private final String server = "http://controlid.multiexportfoods.com:3000";
     //private final String server = "http://controlid-test.multiexportfoods.com:3000";
     //private static String server = "http://192.168.2.77:3000"; // Sealand
@@ -177,10 +177,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //getPeople(editTextRun.getText().toString());
+                getPeople(editTextRun.getText().toString());
                 //new RetrieveTokenTask().execute();
-                new LoadDbTask().execute();
-                getPeople("14511293-1");
+                //new LoadDbTask().execute();
+                //getPeople("14511293-1");
 
             }
         });
@@ -523,14 +523,14 @@ public class MainActivity extends AppCompatActivity {
             try {
                 JSONObject json = new JSONObject(newTokenJson);
                 token = json.getString("token");
-                editTextRun.setText(token);
+                //editTextRun.setText(token);
             } catch ( JSONException e) {
                 this.exception = e;
             }
         }
     }
 
-    public void getPeople(String rut) {
+    public void getPeople_orig(String rut) {
         //Log.i("getPeople(String rut)", rut);
         String finalJson = db.get_one_person(rut);
         editTextCompany.setVisibility(View.GONE);
@@ -625,6 +625,104 @@ public class MainActivity extends AppCompatActivity {
             mp3Error.start();
         }
     }
+
+    public void getPeople(String rut) {
+        //Log.i("getPeople(String rut)", rut);
+        String finalJson = db.get_one_person(rut);
+        editTextCompany.setVisibility(View.GONE);
+        String[] arr = finalJson.split(";");
+        try {
+            // set editText here before any exceptions.
+            editTextRun.setText(arr[7]);
+            //build object with that values, then send to registerTarsk()
+            Record record = new Record();
+            record.setPerson_run(arr[2]);
+
+            if (arr[3].equals("true")) {
+                mp3Permitted.start();
+                //is_permitted = true;
+                record.setPerson_is_permitted(1);
+                if (is_input)
+                    imageview.setImageResource(R.drawable.permitted);
+            } else {
+                mp3Dennied.start();
+                // if has card number define as denied and as employee
+                //is_permitted = false;
+                record.setPerson_is_permitted(0);
+                if (is_input)
+                    imageview.setImageResource(R.drawable.dennied);
+            }
+
+            switch (arr[8]) {
+                case "staff":
+                    editTextFullName.setText(arr[0]);
+                    record.setPerson_fullname(arr[0]);
+                    textViewProfile.setText("Empleado");
+                    break;
+                case "contractor":
+                    editTextFullName.setText(arr[0]);
+                    record.setPerson_fullname(arr[0]);
+                    textViewProfile.setText("Subcontratista");
+                    editTextCompany.setText(arr[4]);
+                    editTextCompany.setVisibility(View.VISIBLE);
+                    break;
+                case "visitor":
+                    textViewProfile.setText("Visita");
+                    // Show denied image, but internally setup record as permitted.
+                    record.setPerson_is_permitted(1);
+                    // If could get the name of pdf417 show it.
+
+                    try {
+                        if (!arr[0].isEmpty()) {
+                            editTextFullName.setText(arr[0]);
+                            record.setPerson_fullname(arr[0]);
+                        } else {
+                            editTextFullName.setText(name);
+                            record.setPerson_fullname(name);
+                        }
+                    } catch (NullPointerException npe) {
+                        editTextFullName.setText("");
+                        record.setPerson_fullname("");
+                    }
+
+                    // If have company show it.
+                    if (!arr[4].isEmpty()) {
+                        editTextCompany.setText(arr[4]);
+                        editTextCompany.setVisibility(View.VISIBLE);
+                    } else {
+                        editTextCompany.setVisibility(View.GONE);
+                    }
+                    break;
+            }
+
+            record.setPerson_mongo_id(arr[1]);
+            record.setPerson_profile(arr[8]);
+            record.setPerson_company(arr[4]);
+            record.setPerson_place(arr[5]);
+            if (arr[7].equals("null")) arr[7] = "0"; // Card -> For Contractors it 0.
+            record.setPerson_company_code(arr[6]);
+            record.setPerson_card(Integer.parseInt(arr[7]));
+            record.setRecord_sync(0);
+            record.setRecord_bus(0);
+
+            if (is_input) {
+                record.setRecord_is_input(1);
+                record.setRecord_input_datetime(getCurrentDateTime());
+            } else {
+                record.setRecord_is_input(0);
+                record.setRecord_output_datetime(getCurrentDateTime());
+            }
+
+            // Save record on local database
+            db.add_record(record);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            mp3Error.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mp3Error.start();
+        }
+    }
+
 
     public class LoadDbTask extends AsyncTask<String, String, String> {
 
@@ -800,7 +898,7 @@ public class MainActivity extends AppCompatActivity {
         return contentAsString;
     }
 
-    public void OfflineRecordsSynchronizer() {
+    public void OfflineRecordsSynchronizer_orig() {
         List records = db.get_desynchronized_records();
 
         String[] arr;
@@ -822,6 +920,33 @@ public class MainActivity extends AppCompatActivity {
             record.setRecord_sync(Integer.parseInt(arr[11]));
             record.setPerson_profile(arr[12]);
             record.setPerson_card(Integer.parseInt(arr[13]));
+            new RegisterTask(record).execute();
+        }
+    }
+
+    public void OfflineRecordsSynchronizer() {
+        List records = db.get_desynchronized_records();
+
+        String[] arr;
+        for (int i = 0; i <= records.size() - 1; i++) {
+            Record record = new Record();
+            arr = records.get(i).toString().split(";");
+            // Get each row to be synchronized
+            record.setRecord_id(Integer.parseInt(arr[0]));
+            record.setPerson_mongo_id(arr[1]);
+            record.setPerson_fullname(arr[2]);
+            record.setPerson_run(arr[3]);
+            record.setRecord_is_input(Integer.parseInt(arr[4]));
+            record.setRecord_bus(Integer.parseInt(arr[5]));
+            record.setPerson_is_permitted(Integer.parseInt(arr[6]));
+            record.setPerson_company(arr[7]);
+            record.setPerson_place(arr[8]);
+            record.setPerson_company_code(arr[9]);
+            record.setRecord_input_datetime(arr[10]);
+            record.setRecord_output_datetime(arr[11]);
+            record.setRecord_sync(Integer.parseInt(arr[12]));
+            record.setPerson_profile(arr[13]);
+            record.setPerson_card(Integer.parseInt(arr[14]));
             new RegisterTask(record).execute();
         }
     }
@@ -969,7 +1094,9 @@ public class MainActivity extends AppCompatActivity {
             // 3. build jsonObject from jsonList
             //jsonObject.accumulate("run", record.getPerson_run());
             //jsonObject.accumulate("fullname", record.getPerson_fullname());
-            jsonObject.accumulate("person", "5855d9b97f45b135cbb73ad1");
+            //jsonObject.accumulate("person", "5855d9b97f45b135cbb73ad1");
+            jsonObject.accumulate("person", record.getMongoId());
+
             //jsonObject.accumulate("personType", record.getPerson_profile());
             jsonObject.accumulate("sector", "5860838c3970532794a746b3");
 
@@ -984,11 +1111,18 @@ public class MainActivity extends AppCompatActivity {
             if (record.getRecord_is_input() == 1) {
                 jsonObject.accumulate("type", "entry");
                 //jsonObject.accumulate("time", record.getRecord_input_datetime());
-                jsonObject.accumulate("time", System.currentTimeMillis());
+                //jsonObject.accumulate("time", System.currentTimeMillis());
+
+                DateFormat formatter = new SimpleDateFormat("yyy-MM-dd HH:mm:ss.S");
+                Date date = (Date)formatter.parse(record.getRecord_input_datetime());
+                jsonObject.accumulate("time", date.getTime());
 
             } else {
                 jsonObject.accumulate("type", "depart");
-                jsonObject.accumulate("time", record.getRecord_output_datetime());
+                DateFormat formatter = new SimpleDateFormat("yyy-MM-dd HH:mm:ss.S");
+                Date date = (Date)formatter.parse(record.getRecord_output_datetime());
+                jsonObject.accumulate("time", date.getTime());
+
             }
 
 //            jsonObject.accumulate("company", record.getPerson_company());

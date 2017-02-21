@@ -6,6 +6,7 @@ package com.ctwings.myapplication;
 public class Record {
 
     int record_id;
+    String person_mongo_id;
     String person_fullname;
     String person_run;
     String person_profile;
@@ -26,9 +27,11 @@ public class Record {
 
     }
 
-    public Record(Integer record_id, String person_fullname, String person_run, String person_profile, Integer record_is_input, Integer record_bus, Integer person_is_permitted, String person_company, String person_place, String person_company_code, String record_input_datetime, String record_output_datetime, Integer record_sync, Integer person_card){
+    public Record(Integer record_id, String mongo_person_id, String person_fullname, String person_run, String person_profile, Integer record_is_input, Integer record_bus, Integer person_is_permitted, String person_company, String person_place, String person_company_code, String record_input_datetime, String record_output_datetime, Integer record_sync, Integer person_card){
+
 
         this.record_id = record_id;
+        this.person_mongo_id = mongo_person_id;
         this.person_fullname = person_fullname;
         this.person_run = person_run;
         this.person_profile = person_profile;
@@ -60,7 +63,13 @@ public class Record {
         return record_id;
     }
 
+    public String getMongoId() {
+        return person_mongo_id;
+    }
+
     public void setRecord_id(int record_id) { this.record_id = record_id; }
+
+    public void setPerson_mongo_id(String id) { this.person_mongo_id = id;}
 
     public String getPerson_fullname() {
         return person_fullname;
@@ -153,6 +162,7 @@ public class Record {
     @Override
     public String toString() {
         return "Record [record_id=" + record_id +
+                ", person_mongo_id=" + person_mongo_id +
                 ", person_fullname=" + person_fullname +
                 ", person_run=" + person_run +
                 ", record_is_input=" + record_is_input +

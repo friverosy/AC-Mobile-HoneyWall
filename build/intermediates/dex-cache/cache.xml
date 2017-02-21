@@ -3,30 +3,12 @@
 
     <item
         is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/support-v4/24.0.0/jars/libs/internal_impl-24.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="fcaf463e10e69c1923ccf1edeba3b4196d239e00">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/internal_impl-24.0.0_b79a8330b73a55788820de4d709f1dda1d4ef151.jar" />
-    </item>
-    <item
-        is-multidex="false"
         jar="/Users/tshen/.gradle/caches/modules-2/files-2.1/com.loopj.android/android-async-http/1.4.6/a845a88238be0b5be9d238652c1bc0605ef91f52/android-async-http-1.4.6.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
         sha1="a845a88238be0b5be9d238652c1bc0605ef91f52">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/android-async-http-1.4.6_d8fdb08e3776f8e41ba5dd0a8ebec40724f7b3bd.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-appindexing/9.8.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="e3234cd25e23069abd48ecd2117bc0e8011bf45a">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-appindexing-9.8.0_bc51739d7709becf7dc32c1a0e6d316459a426c0.jar" />
+        <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/android-async-http-1.4.6_d8fdb08e3776f8e41ba5dd0a8ebec40724f7b3bd.jar" />
     </item>
     <item
         is-multidex="false"
@@ -34,17 +16,8 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="2227988e19ca06aa7543e5ebdd1893586c8904c6">
+        sha1="3dd599989401d694cee48e59e539486352f1a0d3">
         <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/instant-run-bootstrap_7e2e14531ecf344883927707d87a9e0eef6bb1e6.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="ec75036c3c52e451d0cde50a5aedaf5fd32354a0">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.android.support-recyclerview-v7-23.4.0_183cdedd59b6a0503d8bd2c926c774a96e1044b2.jar" />
     </item>
     <item
         is-multidex="false"
@@ -53,16 +26,7 @@
         optimize="true"
         revision="25.0.2"
         sha1="4cf5dc98942cd69ea4fc1302d1b93a575d28120f">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/loopback-sdk-android-1.5.2_9e82e388f2f3e326ddc99a1097eabed19ae3daf1.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/src/main/java/platform_sdk_v2.2.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="198fb6e3856d957a23120e162256ac283c9a9465">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/platform_sdk_v2.2.0_bc204b4f600430f603aeda60d3646a07ff273163.jar" />
+        <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/loopback-sdk-android-1.5.2_9e82e388f2f3e326ddc99a1097eabed19ae3daf1.jar" />
     </item>
     <item
         is-multidex="false"
@@ -71,16 +35,7 @@
         optimize="true"
         revision="25.0.2"
         sha1="80ff9507ae75b5d007d44e856dba6953ff856a69">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/evo-inflector-1.2_d94ab5a0a8cd9ea1b50322733f9680a4b5c3d90d.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-tasks/9.8.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="bf2e1838e4428616c1aa26edf43de72b5b99bf84">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-tasks-9.8.0_9ad03d99ec2708edf6e90ecad09a3b1c026744d6.jar" />
+        <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/evo-inflector-1.2_d94ab5a0a8cd9ea1b50322733f9680a4b5c3d90d.jar" />
     </item>
     <item
         is-multidex="false"
@@ -102,39 +57,12 @@
     </item>
     <item
         is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.android.support-support-vector-drawable-23.4.0_58f3b131a762c27f5524d8ff78197a9f2acd24fd.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="de4db3785756bfb0915a9f59a9b3f2fea7407be4">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.android.support-animated-vector-drawable-23.4.0_f737a5e268e82c8acf2d06ac7be392a95641ed4d.jar" />
-    </item>
-    <item
-        is-multidex="false"
         jar="/Users/tshen/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/24.0.0/support-annotations-24.0.0.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
         sha1="2943c74db6d4346ab8c6531adac91fa05c137c40">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/support-annotations-24.0.0_e12acd4acc4c819c87319cd7bea3d88008b2affe.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.google.firebase/firebase-common/9.8.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="c61641e333fa88da21758bab8cc28ee16604b05f">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.google.firebase-firebase-common-9.8.0_3e52ab28609f662a363fcebff06418828c769765.jar" />
+        <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/support-annotations-24.0.0_e12acd4acc4c819c87319cd7bea3d88008b2affe.jar" />
     </item>
     <item
         is-multidex="false"
@@ -156,30 +84,12 @@
     </item>
     <item
         is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/9.8.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="7e92aadd0697922316d1395c1887a23aebec640a">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-base-9.8.0_d28dee123a268f1aab093e4acdf7fdd2e2979811.jar" />
-    </item>
-    <item
-        is-multidex="false"
         jar="/Applications/Android Studio.app/Contents/gradle/m2repository/com/google/guava/guava/18.0/guava-18.0.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
         sha1="cce0823396aa693798f8882e64213b1772032b09">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/guava-18.0_e11ced1631feb7c9800790c98fd765d3bed1b86c.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/design/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="5326d9a850d491714fef8cbfaa9ea3416f0bf0d2">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.android.support-design-23.4.0_57b4a3e65eeb73e6c735a79ffa67a91208923c04.jar" />
+        <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/guava-18.0_e11ced1631feb7c9800790c98fd765d3bed1b86c.jar" />
     </item>
     <item
         is-multidex="false"
@@ -214,26 +124,8 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.2"
-        sha1="ccd891ac7574ee53edb38343b5dbb94fa6fbe2e0">
+        sha1="efb521ef9fac675c03d41b5bfe3b5e8a6375b3b1">
         <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/instant-run_9d5d322f625098ac76eb57dc9edd083008ad32d6.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.pnikosis/materialish-progress/1.7/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="41a4edf3c43fdbce6eba27da50b17ff9933987f1">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.pnikosis-materialish-progress-1.7_aba432e506a0c4a351e85343b412ab2e40176041.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/support-v4/24.0.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="2f7e6e2dad1bccaf68a8820820adc6c0d5b96d37">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-24.0.0_d36c4b1c4a1b9b8efc7070e829b2c2a72f7223e1.jar" />
     </item>
     <item
         is-multidex="false"
@@ -273,15 +165,6 @@
     </item>
     <item
         is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="8a49545dc6855899fd1658d205840b6f004f6c73">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/instant-run_53cba970229fb2d9a866bcbb2fb14d78b01871f9.jar" />
-    </item>
-    <item
-        is-multidex="false"
         jar="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/exploded-aar/com.pnikosis/materialish-progress/1.7/jars/classes.jar"
         jumboMode="true"
         optimize="true"
@@ -296,7 +179,7 @@
         optimize="true"
         revision="25.0.2"
         sha1="98c86e42679fe7ac066f6c242e0d14f0bce0bb7c">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/org.jbundle.util.osgi.wrapped.org.apache.http.client-4.1.2_b506d24038817f597804409b47d147f97c56acfd.jar" />
+        <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/org.jbundle.util.osgi.wrapped.org.apache.http.client-4.1.2_b506d24038817f597804409b47d147f97c56acfd.jar" />
     </item>
     <item
         is-multidex="false"
@@ -315,33 +198,6 @@
         revision="25.0.2"
         sha1="2f7e6e2dad1bccaf68a8820820adc6c0d5b96d37">
         <dex dex="/Users/tshen/CURRENTLY_MOD/axxezo/access-control-mobile/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-24.0.0_3531fcb2fc6bdc2bf09752e597cee68d63bc292c.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="cb5c7921ee03e30ed1d1ffd2523b06ec83254f34">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/instant-run-bootstrap_9e8a5aba910f0b36295045d6f5688aed8d89d12c.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-basement/9.8.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="9f6d236bac26d02b410e4ee186ba517ace5ee661">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-basement-9.8.0_78a4715aa11a365ad67196a500a07888c4f0e62d.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="25.0.2"
-        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
-        <dex dex="/Users/tshen/Downloads/axxezo-mobile-54041d40e984/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-23.4.0_11689bbd918a9c6cf6025d57e0b90bda69f70f7a.jar" />
     </item>
 
 </items>
