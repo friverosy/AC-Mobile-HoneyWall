@@ -277,11 +277,8 @@ public class MainActivity extends AppCompatActivity {
                     barcodeStr = barcodeStr.substring(0, 9);
                     barcodeStr = barcodeStr.replace(" ", "");
                     if (barcodeStr.endsWith("K")) {
-                        flag = 1;
+                        barcodeStr=barcodeStr.replace("K","0");
                     }
-
-                    barcodeStr = barcodeStr.replace("k", "");
-                    barcodeStr = barcodeStr.replace("K", "");
 
                     // Define length of character.
                     if (Integer.parseInt(barcodeStr) > 400000000 && flag == 0) {
@@ -290,14 +287,18 @@ public class MainActivity extends AppCompatActivity {
                         barcodeStr = barcodeStr.substring(0, barcodeStr.length() - 1);
                     }
 
-                    //get name from DNI
-                    String[] array = rawCode.split("\\s+");
+                    // Get name from DNI.
+                    String[] array = rawCode.split("\\s+"); // Split by whitespace.
                     try {
-                        name = (array[1].substring(0, array[1].indexOf("CHL")));
-                    } catch (Exception e) {
-                        name = (array[2].substring(0, array[2].indexOf("CHL")));
+                        name = array[1].substring(0, array[1].indexOf("CHL"));
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        name = array[2].substring(0, array[2].indexOf("CHL"));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        name = "";
                     }
-                    //name.replace("�", ""); // Dont work :(
+                    barcodeStr = barcodeStr.replace("k", "");
+                    barcodeStr = barcodeStr.replace("K", "");
                 }
 
                 writeLog("Cooked Barcode", barcodeStr);
