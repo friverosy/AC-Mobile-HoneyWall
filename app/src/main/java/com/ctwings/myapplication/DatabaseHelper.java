@@ -220,7 +220,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             for (int i = 0; i<json_db_array.length();i++) {
                 ContentValues values = new ContentValues();
                 try {
-                    values.put(PERSON_RUN, json_db_array.getJSONObject(i).getString("rut"));
+                    //remove the 'dv' in the string 12345678-k => 12345678
+                    String sRut = json_db_array.getJSONObject(i).getString("rut");
+                    int pos = sRut.indexOf('-');
+                    if(pos > 0 ) {
+                        sRut = sRut.substring(0,pos);
+                    }
+
+                    values.put(PERSON_RUN, sRut);
                     values.put(PERSON_PROFILE, json_db_array.getJSONObject(i).getString("type"));
 
                     String sMongoPresonId = json_db_array.getJSONObject(i).getString("_id");
