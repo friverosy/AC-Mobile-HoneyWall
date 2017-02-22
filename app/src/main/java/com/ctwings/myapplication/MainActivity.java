@@ -1156,6 +1156,10 @@ public class MainActivity extends AppCompatActivity {
             if (jsonObject.length() <= 13) { // 13 element on json
                 json = jsonObject.toString();
                 Log.i("json to POST", json);
+                if(record.getMongoId().trim().equals("")) {
+                    Log.i("no mongo id, skip", json );
+                    return "";
+                }
 
                 // 5. set json to StringEntity
                 StringEntity se = new StringEntity(json);
