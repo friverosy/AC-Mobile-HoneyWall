@@ -650,7 +650,7 @@ public class MainActivity extends AppCompatActivity {
         String[] arr = finalJson.split(";");
         try {
             // set editText here before any exceptions.
-            editTextRun.setText(arr[7]);
+            editTextRun.setText(arr[2] + " / " + arr[7]);
             //build object with that values, then send to registerTarsk()
             Record record = new Record();
             record.setPerson_run(arr[2]);
@@ -1156,6 +1156,10 @@ public class MainActivity extends AppCompatActivity {
             if (jsonObject.length() <= 13) { // 13 element on json
                 json = jsonObject.toString();
                 Log.i("json to POST", json);
+                if(record.getMongoId().trim().equals("")) {
+                    Log.i("no mongo id, skip", json );
+                    return "";
+                }
 
                 // 5. set json to StringEntity
                 StringEntity se = new StringEntity(json);
