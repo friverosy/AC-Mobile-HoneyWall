@@ -70,7 +70,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int delay = 60000; // 4 Min. 240000; 600000 10 min
+    private final int delay = 30000; // 4 Min. 240000; 600000 10 min
     //private final String server = "http://controlid.multiexportfoods.com:3000";
     //private final String server = "http://controlid-test.multiexportfoods.com:3000";
     //private static String server = "http://192.168.2.77:3000"; // Sealand
@@ -575,19 +575,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
             switch (arr[7]) {
-                case "E":
+                case "staff":
                     editTextFullName.setText(arr[1]);
                     record.setPerson_fullname(arr[1]);
                     textViewProfile.setText("Empleado");
                     break;
-                case "C":
+                case "contractor":
                     editTextFullName.setText(arr[1]);
                     record.setPerson_fullname(arr[1]);
                     textViewProfile.setText("Subcontratista");
                     editTextCompany.setText(arr[3]);
                     editTextCompany.setVisibility(View.VISIBLE);
                     break;
-                case "V":
+                case "visitor":
                     textViewProfile.setText("Visita");
                     // Show denied image, but internally setup record as permitted.
                     record.setPerson_is_permitted(1);
