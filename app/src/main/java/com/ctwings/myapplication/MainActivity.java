@@ -650,7 +650,7 @@ public class MainActivity extends AppCompatActivity {
         String[] arr = finalJson.split(";");
         try {
             // set editText here before any exceptions.
-            editTextRun.setText(arr[7]);
+            editTextRun.setText(arr[2] + " / " + arr[7]);
             //build object with that values, then send to registerTarsk()
             Record record = new Record();
             record.setPerson_run(arr[2]);
