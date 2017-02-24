@@ -44,6 +44,7 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.SyncBasicHttpContext;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -79,9 +80,8 @@ public class MainActivity extends AppCompatActivity {
     //private static String server = "http://10.0.0.69:3000";
     private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:9000"; // Integration server
     //private static String server = "http://bm03.bluemonster.cl:9000"; // Integration server
-    private static String idCompany;
-    private static String idSector;
-    private static String serialNumber = Build.SERIAL;
+    private String idCompany = "";
+    private String idSector = "";
     private static String version = "f2fadba";
 
     private ImageView imageview;
@@ -140,16 +140,6 @@ public class MainActivity extends AppCompatActivity {
         //call the loading library in xml file
         loading = (ProgressWheel) findViewById(R.id.loading);
         loading.setVisibility(View.GONE);
-
-        //TODO tshen: this should be set reading a webservice
-        if(serialNumber.trim().equals("33b7ddaf")) {
-            idCompany = "585597684f6ad8244e26748e";
-            idSector = "5860838c3970532794a746b3";
-        } else {
-            //by default use these values
-            idCompany = "585597684f6ad8244e26748e";
-            idSector = "5860838c3970532794a746b3";
-        }
 
         writeLog("DEBUG", "Application has started Correctly");
         UpdateDb();
@@ -753,11 +743,35 @@ public class MainActivity extends AppCompatActivity {
 
         protected String doInBackground(String... params) {
             //return DbCall(server + "/api/people?filter[where][is_permitted]=true");
-            //tshen: TODO: - figure out a way to retrieve the company id
-            //             - change the name of the endpoint from "persons" to "people"
-            return DbCall(server + "/api/companies/" + idCompany + "/persons");
-            //return DbCall(server + "/api/persons");
 
+            if(token.equals("")) {
+                //haven't got the token yet, do not issue any request, wait for the RetrieveTokenTask to finish first.
+                return "204";
+            }
+            //retrieve the company, and sector
+            String json = "{}";
+            if(idCompany.equals("")) {
+                //first time, idCompany is empty, we need to configure it.
+                try {
+                    String serialNumber = Build.SERIAL;
+                    json = getPDAConfiguration(server + "/api/pdas/" + serialNumber);
+                    if(json == "408")
+                        return json;
+                    JSONArray json_array;
+                    json_array = new JSONArray(json);
+                    idCompany = json_array.getJSONObject(0).getString("company");
+                    idSector = json_array.getJSONObject(0).getString("sector");
+                } catch (JSONException jex) {
+                    Log.e("json", json);
+                    jex.printStackTrace();
+                }
+            }
+
+            if(!idCompany.equals("")) {
+                return DbCall(server + "/api/companies/" + idCompany + "/persons");
+            } else {
+                return "204";
+            }
         }
 
         protected void onProgressUpdate(String... progress) {
@@ -772,6 +786,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IllegalStateException ise) {
                     ise.printStackTrace();
                 }
+
             }
             loading.setVisibility(View.GONE);
         }
@@ -914,6 +929,49 @@ public class MainActivity extends AppCompatActivity {
 
         return contentAsString;
     }
+
+    //TODO tshen: to be refactorized together with DBCall
+    public String getPDAConfiguration(String dataUrl) {
+
+        String contentAsString;
+        URL url;
+        HttpURLConnection connection = null;
+
+        try {
+            // Create connection
+            url = new URL(dataUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            //setting headers
+            connection.setRequestProperty("Authorization", "Bearer " + token);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setConnectTimeout(2000);
+            connection.connect();
+
+            int responsecode = connection.getResponseCode();
+
+            // Get Response
+            InputStream is = connection.getInputStream();
+            if (responsecode != 200) // OK
+                contentAsString = String.valueOf(responsecode);
+            else {
+                contentAsString = convertInputStreamToString(is);
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            contentAsString = "408"; // Request Timeout
+        }
+        if (connection != null) {
+            connection.disconnect();
+        }
+        if (contentAsString.length() <= 2) { //[]
+            contentAsString = "204"; // No content
+        }
+        return contentAsString;
+    }
+
 
     public void OfflineRecordsSynchronizer_orig() {
         List records = db.get_desynchronized_records();
