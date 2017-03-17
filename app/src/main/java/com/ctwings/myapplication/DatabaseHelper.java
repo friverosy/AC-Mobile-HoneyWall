@@ -253,6 +253,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             values.put(PERSON_COMPANY, sCompanyName);
                             values.put(PERSON_COMPANY_CODE, sCompanyCode);
                             values.put(PERSON_IS_PERMITTED, json_db_array.getJSONObject(i).getString("active"));
+                            values.put(PERSON_CARD, json_db_array.getJSONObject(i).getString("card"));
                             break;
                         case "visitor": // Visit
                             values.put(PERSON_MONGOID, sMongoPresonId);
