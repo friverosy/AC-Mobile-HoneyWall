@@ -1173,7 +1173,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.accumulate("person", record.getMongoId());
 
             //jsonObject.accumulate("personType", record.getPerson_profile());
-            jsonObject.accumulate("sector", idSector);
+            //jsonObject.accumulate("sector", idSector);  //see UNWP-71
 
 //            if (record.getPerson_profile().equals("V")) {
 //                jsonObject.accumulate("is_permitted", true);
@@ -1305,7 +1305,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Void... params) {
-            return POST(newRecord, server + "/api/registers/");
+            return POST(newRecord, server + "/api/sectors/" + idSector + "/registers/");
         }
     }
 
