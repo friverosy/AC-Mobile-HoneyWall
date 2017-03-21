@@ -581,6 +581,7 @@ public class MainActivity extends AppCompatActivity {
                     textViewProfile.setText("Visita");
                     // Show denied image, but internally setup record as permitted.
                     record.setPerson_is_permitted(1);
+                    record.setPerson_fullname("NA");
                     // If could get the name of pdf417 show it.
 
                     try {
@@ -634,7 +635,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getPeople(String rut) {
-        //Log.i("getPeople(String rut)", rut);
+        Log.i("getPeople(String rut)", rut);
         String finalJson = db.get_one_person(rut);
         editTextCompany.setVisibility(View.GONE);
         String[] arr = finalJson.split(";");
@@ -643,7 +644,8 @@ public class MainActivity extends AppCompatActivity {
             editTextRun.setText(arr[2] + " / " + arr[7]);
             //build object with that values, then send to registerTarsk()
             Record record = new Record();
-            record.setPerson_run(arr[2]);
+            //record.setPerson_run(arr[2]);
+            record.setPerson_run(rut);
 
             if (arr[3].equals("true")) {
                 mp3Permitted.start();
@@ -1171,6 +1173,8 @@ public class MainActivity extends AppCompatActivity {
             //jsonObject.accumulate("fullname", record.getPerson_fullname());
             //jsonObject.accumulate("person", "5855d9b97f45b135cbb73ad1");
             jsonObject.accumulate("person", record.getMongoId());
+            jsonObject.accumulate("rut", record.getPerson_run());
+            jsonObject.accumulate("card", record.getPerson_card());
 
             //jsonObject.accumulate("personType", record.getPerson_profile());
             //jsonObject.accumulate("sector", idSector);  //see UNWP-71
@@ -1215,8 +1219,8 @@ public class MainActivity extends AppCompatActivity {
                 json = jsonObject.toString();
                 Log.i("json to POST", json);
                 if(record.getMongoId().trim().equals("")) {
-                    Log.i("no mongo id, skip", json );
-                    return "";
+                    Log.i("unauthorized person", json );
+                    //return "";
                 }
 
                 // 5. set json to StringEntity
