@@ -22,25 +22,25 @@
         android:textOn="Entrada"
         android:textOff="Salida" />
 
-    <EditText
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText_fullname"
+        android:id="@+id/textView_name"
         android:textSize="20dp"
         android:textAlignment="center" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText_run"
+        android:id="@+id/editText_rut"
         android:textSize="18dp"
         android:textAlignment="center" />
 
-    <EditText
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText_company"
-        android:textSize="20dp"
+        android:id="@+id/textView_company"
+        android:textSize="18dp"
         android:textAlignment="center"
         android:textStyle="normal|bold"
         android:typeface="normal" />

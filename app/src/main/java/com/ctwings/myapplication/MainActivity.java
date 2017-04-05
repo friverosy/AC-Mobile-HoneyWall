@@ -4,16 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.device.ScanManager;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
@@ -21,7 +19,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,49 +30,31 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.pnikosis.materialishprogress.ProgressWheel;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.SyncBasicHttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.HttpURLConnection;
-import java.net.Socket;
 import java.net.URL;
-import java.net.URLConnection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -84,24 +63,24 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int delayPeople = 36000 ; // 4 Min. 240000; 600000 10 min
-    private final int delayRecords = 2400; // 4 Min. 240000; 480000 8 min
+    private final int delayPeople = 10000 ; // 4 Min. 240000; 600000 10 min
+    private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
     private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:9000"; // Test server
     private String idCompany = "";
     private String idSector = "";
     private String token = "";
     private int pdaNumber;
-    private static String version = "f2fadba";
+    private static String version = "cf0649f";
     private getPeopleTask getPeopleInstance;
     private postRecordsTask postRecordsInstance;
 
     private ImageView imageview;
     private EditText editTextRun;
-    private EditText editTextFullName;
+    private TextView textViewName;
     private TextView textViewVersion;
     private String name = "";
-    private EditText editTextCompany;
+    private TextView textViewCompany;
     private TextView textViewProfile;
     private ProgressWheel loading;
     private boolean is_input;
@@ -140,9 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Get initial setup
         new getSetupTask().execute();
-
-        // Insert Test data
-        //testRecords(200);
         
         //create the log file
         File log = new File(this.getFilesDir() + File.separator + "AccessControl.log");
@@ -164,15 +140,15 @@ public class MainActivity extends AppCompatActivity {
         updateRecords();
 
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        editTextRun = (EditText) findViewById(R.id.editText_run);
-        editTextFullName = (EditText) findViewById(R.id.editText_fullname);
-        editTextCompany = (EditText) findViewById(R.id.editText_company);
+        editTextRun = (EditText) findViewById(R.id.editText_rut);
+        textViewName = (TextView) findViewById(R.id.textView_name);
+        textViewCompany = (TextView) findViewById(R.id.textView_company);
         textViewProfile = (TextView) findViewById(R.id.textView_profile);
         imageview = (ImageView) findViewById(R.id.imageView);
         mp3Dennied = MediaPlayer.create(MainActivity.this, R.raw.bad);
         mp3Permitted = MediaPlayer.create(MainActivity.this, R.raw.good);
         mp3Error = MediaPlayer.create(MainActivity.this, R.raw.error);
-        editTextCompany.setVisibility(View.GONE);
+        textViewCompany.setVisibility(View.GONE);
         mySwitch = (Switch) findViewById(R.id.mySwitch);
         mySwitch.setChecked(true);
         textViewVersion = (TextView) findViewById(R.id.textView_version);
@@ -410,21 +386,19 @@ public class MainActivity extends AppCompatActivity {
 
     public void cleanEditText(){
         editTextRun.setText("");
-        editTextFullName.setText("");
-        editTextCompany.setText("");
+        textViewName.setText("");
+        textViewCompany.setText("");
         textViewProfile.setText("");
         imageview.setImageDrawable(null);
         name = null;
     }
 
-    public String getCurrentDateTime() {
-        Calendar cal = Calendar.getInstance();
-        Date currentLocalTime = cal.getTime();
-        DateFormat date = new SimpleDateFormat("yyy-MM-dd HH:mm:ss.S");
-        String localTime = date.format(currentLocalTime);
-        return localTime;
-    }
-
+    /**
+     * Method that asks each delayRecord time
+     * if the number of records that are not synchronized (offline records (record_sync = 0)) with the backend,
+     * calls the postRecords method that get all this offline records
+     * and send to asynchronous method called postRecordsTask.
+     */
     public void updateRecords() {
         final DatabaseHelper db = DatabaseHelper.getInstance(this);
         Timer timer = new Timer();
@@ -445,6 +419,7 @@ public class MainActivity extends AppCompatActivity {
                                 postRecords();
                             }
                         } catch (Exception e) {
+                            e.printStackTrace();
                             log.writeLog(getApplicationContext(), "Main:line 419", "ERROR", e.getMessage());
                         }
                     }
@@ -454,6 +429,11 @@ public class MainActivity extends AppCompatActivity {
         timer.schedule(task, 0, delayRecords);
     }
 
+    /**
+     * It makes a call to the asynchronous task
+     * that obtains by http get people from the API
+     * Each delayPeople time.
+     */
     public void updatePeople() {
         Timer timer = new Timer();
         final Handler handler = new Handler();
@@ -479,112 +459,101 @@ public class MainActivity extends AppCompatActivity {
     public void getPerson(String rut) {
         log_app log = new log_app();
         DatabaseHelper db = DatabaseHelper.getInstance(this);
-        String personJson = db.get_one_person(rut);
-        editTextCompany.setVisibility(View.GONE);
-        String[] arr = personJson.split(";");
+        Cursor person = db.get_one_person(rut);
+
+        textViewCompany.setVisibility(View.GONE);
+
         try {
-            // set editText here before any exceptions.
-            editTextRun.setText(arr[2]);
             //build object with that values, then send to registerTarsk()
             Record record = new Record();
-            record.setPerson_run(rut);
 
-            if (arr[3].equals("true")) {
-                mp3Permitted.start();
-                //is_permitted = true;
-                record.setPerson_is_permitted(1);
-                if (is_input)
-                    imageview.setImageResource(R.drawable.permitted);
-            } else {
-                mp3Dennied.start();
-                // if has card number define as denied and as employee
-                //is_permitted = false;
-                record.setPerson_is_permitted(0);
+            // If has not a person.
+            if (person.getCount() < 1) {
+                new loadSound(3).execute();
+                editTextRun.setText(rut);
+                editTextRun.setVisibility(View.VISIBLE);
+                record.setRecord_person_rut(rut);
                 if (is_input)
                     imageview.setImageResource(R.drawable.dennied);
-            }
-
-            switch (arr[8]) {
-                case "staff":
-                    editTextFullName.setText(arr[0]);
-                    record.setPerson_fullname(arr[0]);
-                    textViewProfile.setText("Empleado");
-                    break;
-                case "contractor":
-                    editTextFullName.setText(arr[0]);
-                    record.setPerson_fullname(arr[0]);
-                    textViewProfile.setText("Subcontratista");
-                    editTextCompany.setText(arr[4]);
-                    editTextCompany.setVisibility(View.VISIBLE);
-                    break;
-                case "visitor":
-                    textViewProfile.setText("Visita");
-                    // Show denied image, but internally setup record as permitted.
-                    record.setPerson_is_permitted(1);
-                    // If could get the name of pdf417 show it.
-
-                    try {
-                        if (!arr[0].isEmpty()) {
-                            editTextFullName.setText(arr[0]);
-                            record.setPerson_fullname(arr[0]);
-                        } else {
-                            editTextFullName.setText(name);
-                            record.setPerson_fullname(name);
-                        }
-                    } catch (NullPointerException npe) {
-                        editTextFullName.setText("");
-                        record.setPerson_fullname("");
-                        log.writeLog(getApplicationContext(), "Main:line 504", "ERROR", npe.getMessage());
-                    }
-
-                    // If have company show it.
-                    if (!arr[4].isEmpty()) {
-                        editTextCompany.setText(arr[4]);
-                        editTextCompany.setVisibility(View.VISIBLE);
-                    } else {
-                        editTextCompany.setVisibility(View.GONE);
-                    }
-                    break;
-            }
-
-            record.setPerson_mongo_id(arr[1]);
-            record.setPerson_profile(arr[8]);
-            record.setPerson_company(arr[4]);
-            record.setPerson_place(arr[5]);
-            if (arr[7].equals("null")) arr[7] = "0"; // Card -> For Contractors it 0.
-            record.setPerson_company_code(arr[6]);
-            record.setPerson_card(Integer.parseInt(arr[7]));
-            record.setRecord_sync(0);
-            record.setRecord_bus(0);
-
-            if (is_input) {
-                record.setRecord_is_input(1);
-                record.setRecord_input_datetime(getCurrentDateTime());
             } else {
-                record.setRecord_is_input(0);
-                record.setRecord_output_datetime(getCurrentDateTime());
+                record.setPerson_mongo_id(person.getString(person.getColumnIndex("person_mongo_id")));
+                if (person.getString(person.getColumnIndex("person_active")).equals("true")) {
+                    new loadSound(2).execute();
+                    editTextRun.setVisibility(View.GONE);
+                    if (is_input)
+                        imageview.setImageResource(R.drawable.permitted);
+                } else {
+                    new loadSound(3).execute();
+                    editTextRun.setVisibility(View.VISIBLE);
+                    if (is_input)
+                        imageview.setImageResource(R.drawable.dennied);
+                }
+
+                switch (person.getString(person.getColumnIndex("person_type"))) {
+                    case "staff":
+                        textViewName.setText(person.getString(person.getColumnIndex("person_name")));
+                        textViewProfile.setText("Empleado");
+                        textViewCompany.setVisibility(View.GONE);
+                        editTextRun.setVisibility(View.GONE);
+                        break;
+                    case "contractor":
+                        textViewName.setText(person.getString(person.getColumnIndex("person_name")));
+                        textViewProfile.setText("Subcontratista");
+                        textViewCompany.setText(person.getString(person.getColumnIndex("person_company")));
+                        textViewCompany.setVisibility(View.VISIBLE);
+                        break;
+                    case "visitor":
+                        textViewProfile.setText("Visita");
+                        // If could get the name of pdf417 show it.
+                        try {
+                            if (!person.getString(1).isEmpty()) {
+                                textViewName.setText(person.getString(person.getColumnIndex("person_name")));
+                            } else {
+                                textViewName.setText(name);
+                            }
+
+                            // If have company show it.
+                            if (!person.getString(person.getColumnIndex("person_company")).isEmpty()) {
+                                textViewCompany.setText(person.getString(person.getColumnIndex("person_company")));
+                                textViewCompany.setVisibility(View.VISIBLE);
+                            } else {
+                                textViewCompany.setVisibility(View.GONE);
+                            }
+                        } catch (NullPointerException npe) {
+                            textViewName.setText("");
+                            log.writeLog(getApplicationContext(), "Main:line 504", "ERROR", npe.getMessage());
+                        }
+                        break;
+                }
             }
+
+            person.close();
+
+            record.setRecord_sync(0);
+            record.setRecord_date(new Date().getTime());
+
+            if (is_input) record.setRecord_type("entry");
+            else record.setRecord_type("depart");
 
             // Save record on local database
             db.add_record(record);
         } catch (ArrayIndexOutOfBoundsException aiobe) {
             new loadSound(1).execute(); // Error sound.
+            aiobe.printStackTrace();
             log.writeLog(getApplicationContext(), "Main:line 538", "ERROR", aiobe.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             new loadSound(1).execute(); // Error sound.
             log.writeLog(getApplicationContext(), "Main:line 542", "ERROR", e.getMessage());
         }
     }
 
+    /**
+     * 1: Error, 2: Permitted, 3: Denied, 4: Stop all.
+     */
     private class loadSound extends AsyncTask<Void, Void, Void> {
         private int typeSound = -1;
 
-        /*  Asyntask to play sounds in background
-         *  1 Error
-         *  2 Permitted
-         *  3 Denied
-         *  4 stop all
-         */
         private loadSound(int typeSound) {
             this.typeSound = typeSound;
         }
@@ -667,9 +636,6 @@ public class MainActivity extends AppCompatActivity {
                                 // Set global vars
                                 idCompany = json_array.getJSONObject(0).getString("company");
                                 idSector = json_array.getJSONObject(0).getString("sector");
-                                Log.d("token", token);
-                                Log.d("Company", idCompany);
-                                Log.d("Sector", idSector);
                             }
                         } catch (JSONException jex) {
                             jex.printStackTrace();
@@ -692,6 +658,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Make a background call to httpGet which,
+     * using the url sent as parameter
+     * returns the json sent by the API as a string
+     *
+     * OnPostExecute, Sends the json obtained as parameter
+     * to the add_people method of the databaseHelper class
+     * to be inserted into the local database
+     */
     public class getPeopleTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
@@ -700,19 +675,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected String doInBackground(String... params) {
-
-            if(token.equals("")) {
-                //haven't got the token yet, do not issue any request, wait for the RetrieveTokenTask to finish first.
-                return "204";
-            } else if(!(idCompany.equals("") || idSector.equals(""))) {
-                return httpGet(server + "/api/companies/" + idCompany + "/persons");
-            } else {
-                return "204";
-            }
-        }
-
-        protected void onProgressUpdate(String... progress) {
-            return;
+            if(token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
+            else return httpGet(server + "/api/companies/" + idCompany + "/persons");
         }
 
         protected void onPostExecute(String json) {
@@ -764,6 +728,10 @@ public class MainActivity extends AppCompatActivity {
         return contentAsString;
     }
 
+    /**
+     * Gets offline records as a list of records
+     * that will be sent to postRecordsTask per parameter.
+     */
     public void postRecords() {
         DatabaseHelper db = DatabaseHelper.getInstance(this);
         List<Record> records = db.getOfflineRecords();
@@ -780,7 +748,6 @@ public class MainActivity extends AppCompatActivity {
 
         inputStream.close();
         return result;
-
     }
 
     public void httpPost(Record record, String url, OkHttpClient client) {
@@ -792,35 +759,33 @@ public class MainActivity extends AppCompatActivity {
                 = MediaType.parse("application/json; charset=utf-8");
         try {
             // Build jsonObject from record object
-            jsonObject.accumulate("person", record.getMongoId());
+            jsonObject.accumulate("person", record.getPerson_mongo_id());
+            jsonObject.accumulate("time", record.getRecord_date());
+            jsonObject.accumulate("type", record.getRecord_type());
 
-            DateFormat formatter = new SimpleDateFormat("yyy-MM-dd HH:mm:ss.S");
-            if (record.getRecord_is_input() == 1) {
-                jsonObject.accumulate("type", "entry");
-                Date date = formatter.parse(record.getRecord_input_datetime());
-                jsonObject.accumulate("time", date.getTime());
-            } else {
-                jsonObject.accumulate("type", "depart");
-                Date date = formatter.parse(record.getRecord_output_datetime());
-                jsonObject.accumulate("time", date.getTime());
-            }
+            if (record.getRecord_person_rut() != null)
+                jsonObject.accumulate("rut", record.getRecord_person_rut());
 
-            // 4. convert JSONObject to JSON to String
-
+            // Convert JSONObject to JSON to String
             json = jsonObject.toString();
             Log.i("json to POST", json);
 
             RequestBody body = RequestBody.create(JSON, json);
 
-            //create object okhttp
+            // Create object okhttp
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Accept", "application/json")
+                    .addHeader("Cache-Control","no-cache,no-store,max-age=0,must-revalidate")
+                    .addHeader("Pragma","no-cache")
+                    .addHeader("Expires","-1")
+                    .addHeader("X-Content-Type-Options","nosniff")
                     .addHeader("Content-type", "application/json")
                     .addHeader("Authorization", "Bearer " + token)
                     .post(body)
                     .build();
-            // 8. Execute POST request to the given URL
+
+            // Execute POST request to the given URL
             Response response = client.newCall(request).execute();
             String bodyResponse = response.body().string();
             if (response.isSuccessful()) {
@@ -828,15 +793,21 @@ public class MainActivity extends AppCompatActivity {
                     // if has sync = 0 its becouse its an offline record to be will posted.
                     if (record.getRecord_sync() == 0) db.update_record(record.getRecord_id());
                 } else Log.e("tmp empty", bodyResponse);
-            } else Log.e("Error", response.message());
+            } else Log.e(response.message(), bodyResponse);
         } catch (HttpHostConnectException hhc) {
+            hhc.printStackTrace();
             log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", hhc.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", e.getMessage());
         }
     }
 
-    public class postRecordsTask extends AsyncTask<Void, Void, String> {
+    /**
+     * It receives the list of records offline,
+     * and calls for each record to the asynchronous httpPost() that performs the post.
+     */
+    public class postRecordsTask extends AsyncTask<Void, Void, Void> {
 
         private List<Record> records;
 
@@ -845,8 +816,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(Void... params) {
-            String postReturn = "";
+        protected Void doInBackground(Void... params) {
             DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());
             pdaNumber = db.get_config_id_pda();
             final OkHttpClient client = new OkHttpClient.Builder()
@@ -860,39 +830,12 @@ public class MainActivity extends AppCompatActivity {
                     Record record = records.get(i);
                     httpPost(record, server + "/api/sectors/" + idSector + "/registers/", client);
                 }
-            } else {
-                Log.e("Error", "idSector missing");
-                return "";
             }
-
-            return postReturn;
+            return null;
         }
     }
 
     public void makeToast(String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-    }
-
-    public void testRecords(int loop) {
-        DatabaseHelper db = DatabaseHelper.getInstance(this);
-        for (int i = 0; i < loop; i++) {
-            Record records = new Record();
-            int random = (int) Math.floor(Math.random() * (30000000 - 10000000) + loop);
-            int random2 = (int) Math.floor(Math.random() * (99999 - 10000) + loop);
-            records.setPerson_card(random2);
-            records.setPerson_fullname("Test " + i);
-            records.setPerson_run(random + "");
-            records.setRecord_is_input(1);
-            records.setPerson_is_permitted(1);
-            records.setRecord_sync(0);
-            records.setPerson_profile("E");
-            try {
-                Thread.sleep(100);
-                records.setRecord_input_datetime(getCurrentDateTime());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            db.add_record(records);
-        }
     }
 }
