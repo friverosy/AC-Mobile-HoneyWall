@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import com.ctwings.myapplication.R;
 
 /**
- * A placeholder fragment containing a simple view.
+ * A placeholder fragment containing a configuration view.
  */
 public class SettingFragment extends Fragment {
 

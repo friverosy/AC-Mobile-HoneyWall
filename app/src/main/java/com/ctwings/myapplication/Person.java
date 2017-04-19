@@ -1,7 +1,7 @@
 package com.ctwings.myapplication;
 
 /**
- * Created by nicolasmartin on 03-08-16.
+ * Person object, contain person data.
  */
 public class Person {
     String person_mongo_id;

@@ -61,11 +61,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * Handle register and people. Have the main business logic.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private final int delayPeople = 10000 ; // 4 Min. 240000; 600000 10 min
     private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
     private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
+    //private static String server = "http://192.168.1.102:9000"; // Integration server
     //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:9000"; // Test server
     private String idCompany = "";
     private String idSector = "";
@@ -209,6 +213,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Get data from barcode as byte array and parsed to string.
+     * This obtained string is sent to the getPerson() method to be handled.
+     */
     private BroadcastReceiver mScanReceiver = new BroadcastReceiver() {
 
         @Override
@@ -281,6 +289,19 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Dictionary of MD5 hashes, each one executes a task.
+     * @param barcodeStr Hash MD5
+     *                   Sync offline registers,
+     *                   get total of registers,
+     *                   get total of people,
+     *                   get total of employees,
+     *                   get total of contractors,
+     *                   get total of visitors,
+     *                   drop people table,
+     *                   drop record table,
+     *                   call log viewer fragment.
+     */
     private void SetUp(String barcodeStr) {
         switch (barcodeStr) {
             case "CONFIG-AXX-637B55B8AA55C7C7D3810E0CE05B1E80":
@@ -456,6 +477,11 @@ public class MainActivity extends AppCompatActivity {
         timer.schedule(task, 0, delayPeople);
     }
 
+    /**
+     * Get information about one person from local database (sqlite) and
+     * Build a record object to be insert into local database as register (event)
+     * @param rut
+     */
     public void getPerson(String rut) {
         log_app log = new log_app();
         DatabaseHelper db = DatabaseHelper.getInstance(this);
@@ -549,6 +575,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Call to a sound to validation.
      * 1: Error, 2: Permitted, 3: Denied, 4: Stop all.
      */
     private class loadSound extends AsyncTask<Void, Void, Void> {
@@ -589,6 +616,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Generate a session and token on API and
+     * Get from API, the company and sector related with to this PDA.
+     *
+     * This is a basic (necessary) data to traffic data with API.
+     */
     public class getSetupTask extends AsyncTask<String, String, String>{
 
         private Exception exception;
@@ -674,11 +707,21 @@ public class MainActivity extends AppCompatActivity {
             loading.setVisibility(View.VISIBLE);
         }
 
+        /**
+         *  Do a http get to obtain an array json with people.
+         * @param params not used.
+         * @return a http get response, its an array json.
+         */
         protected String doInBackground(String... params) {
             if(token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
             else return httpGet(server + "/api/companies/" + idCompany + "/persons");
         }
 
+        /**
+         * Send to the dataBaseHelper the json Array it receives,
+         * to insert it into the local database (sqlite).
+         * @param json
+         */
         protected void onPostExecute(String json) {
              // When response its 200, json save data no code.
             if (json != "408" && json != "204") {
@@ -692,6 +735,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Do a HTTP get request.
+     * @param dataUrl
+     * @return http get response as string.
+     */
     public String httpGet(String dataUrl) {
 
         String contentAsString = "";
@@ -750,6 +798,12 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    /**
+     * Do a HTTP post to posted a register to API.
+     * @param record object, contain data to build json.
+     * @param url endpoint to receive a json.
+     * @param client Http client library.
+     */
     public void httpPost(Record record, String url, OkHttpClient client) {
         String json = "";
         DatabaseHelper db = DatabaseHelper.getInstance(this);
@@ -815,6 +869,11 @@ public class MainActivity extends AppCompatActivity {
             this.records = records;
         }
 
+        /**
+         * Rove the list of offline records and each sends an obj record to the method httpPost()
+         * @param params Record type list
+         * @return Always null.
+         */
         @Override
         protected Void doInBackground(Void... params) {
             DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());

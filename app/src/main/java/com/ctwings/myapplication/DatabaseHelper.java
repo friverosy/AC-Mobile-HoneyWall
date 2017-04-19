@@ -8,7 +8,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -18,18 +17,20 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A helper class to manage database creation and version management.
+ * Handle people and record, for each one have CRUD.
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    //Instance of Helper to keep one conection all time
+    // Instance of Helper to keep one connection all time
     private static DatabaseHelper sInstance;
-
     // Database Version
     private static final int DATABASE_VERSION = 1;
     // Database Name
     private static final String DATABASE_NAME = "Multiempresa";
     // Get context for use
     private Context context;
-
     // Table names
     private static final String TABLE_PERSON = "PERSON";
     private static final String TABLE_RECORD = "RECORD";
@@ -59,13 +60,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static synchronized DatabaseHelper getInstance(Context context) {
         //one single instance of DB
-        if (sInstance == null) {
+        if (sInstance == null)
             sInstance = new DatabaseHelper(context.getApplicationContext());
-        }
         return sInstance;
     }
 
-    // SQL statement to create User table
+    /**
+     * SQL statement to create User table
+     */
     String CREATE_PERSON_TABLE = "CREATE TABLE " + TABLE_PERSON + " ( " +
             PERSON_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             PERSON_MONGO_ID + " TEXT, " +
@@ -125,7 +127,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         this.onCreate(db);
     }
 
-    // People CRUD
+    /**
+     * Drop people table and insert into it every person in the json array obtained through http get.
+     * Use it ihelper and transactions to decrease the insertion time,
+     * the fields to insert will depend on the profile of the person.
+     * @param json
+     *             Rut: Rut or Passport Number.
+     *             type: Profile of person (Emplopyee as staff, contractor and visitor).
+     *             personObjectId: MongoDB id for this person.
+     *             company: Company to which the person belongs.
+     *             active: State of person, will be active or inactive.
+     *             name: full name's person.
+     *             card: Oficial plastic card number.
+     */
     public void add_people(String json){
         final long startTime = System.currentTimeMillis();
         log_app log = new log_app();
@@ -143,7 +157,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String sCompany;
             JSONObject jCompany;
             String sCompanyName;
-
 
             for (int i = 0; i < json_db_array.length(); i++) {
                 iHelp.prepareForInsert();
@@ -213,6 +226,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Find one person by rut OR card number as id.
+     * @param id
+     * @return a cursor with person information finded.
+     */
     public Cursor get_one_person(String id){
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = null;
@@ -244,7 +262,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    //Records
+    /**
+     * Insert a register (event) into record table
+     * @param record object.
+     *               personObjectId: MongoDB id for this person.
+     *               recordType: Entry or Depart.
+     *               personRut: Rut or Passport Number.
+     *               recordDate: datetime obtain from android as timestamp.
+     *               recordSync: 1: To mark it as posted (Synchronized), and 0 to mark as pending (Unsync).
+     */
     public void add_record(Record record){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -265,6 +291,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    /**
+     * Get all unzync registers, have a 0 on sync camp.
+     * @return a list of records (recordId, personObjectId, personRut, recordType, recordDate, recordSync).
+     *               recordId: id sqlite.
+     *               personObjectId: id MongoDB.
+     *               personRut: Rut or passport number.
+     *               recordType: Entry or Depart.
+     *               recordDate: datetime obtain from android as timestamp.
+     *               recordSync: 1: To mark it as posted (Synchronized), and 0 to mark as pending (Unsync).
+     */
     public List<Record> getOfflineRecords(){
         SQLiteDatabase db = this.getReadableDatabase();
         log_app log = new log_app();
@@ -369,8 +405,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     values, // column/value
                     RECORD_ID + "=" + id, // where
                     null);
-
-            //db.close();
             if (i == 0) Log.e("Error updating record", String.valueOf(id));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -392,40 +426,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return 0;
         }
     }
-
-    public String get_config_url() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT url FROM " + TABLE_SETTING, null);
-        if (cursor.moveToFirst()) {
-            return cursor.getString(cursor.getColumnIndex("id_pda"));
-        } else {
-            return "";
-        }
-    }
-
-    public int get_config_port() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT port FROM " + TABLE_SETTING, null);
-        if (cursor.moveToFirst()) {
-            return cursor.getInt(cursor.getColumnIndex("port"));
-        } else {
-            return 0;
-        }
-    }
-
-    /*public void set_config_url(String url) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("url", url);
-        db.update(TABLE_SETTING, cv, null, null);
-    }
-
-    public void set_config_port(int port) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("port", port);
-        db.update(TABLE_SETTING, cv, null, null);
-    }*/
 
     public void set_config_id_pda(int id) {
         SQLiteDatabase db = this.getWritableDatabase();

@@ -1,9 +1,7 @@
 package com.ctwings.myapplication;
 
-import android.util.Log;
-
 /**
- * Created by Cristtopher Quintana on 12-08-16.
+ * Record object, contain register data.
  */
 public class Record {
 

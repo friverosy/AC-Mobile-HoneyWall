@@ -1,8 +1,5 @@
 package com.ctwings.myapplication;
 
-/**
- * Created by cristtopher on 04-03-16.
- */
 public class Server {
     //private variables
     int _id;
