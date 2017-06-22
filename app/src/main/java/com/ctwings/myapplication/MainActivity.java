@@ -4,9 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.device.ScanManager;
 import android.graphics.Color;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.AsyncTask;
@@ -26,6 +28,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +60,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import info.hoang8f.android.segmented.SegmentedGroup;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -66,11 +72,11 @@ import okhttp3.Response;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private final int delayPeople = 10000 ; // 4 Min. 240000; 600000 10 min
+    private final int delayPeople = 10000; // 4 Min. 240000; 600000 10 min
     private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
-    private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
+    //private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
-    //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:9000"; // Test server
+    private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
     private String idCompany = "";
     private String idSector = "";
     private String token = "";
@@ -97,11 +103,13 @@ public class MainActivity extends AppCompatActivity {
     private String barcodeStr;
     private String barcodeCache;
     private boolean isScaning = false;
-    private Switch mySwitch;
+    private SegmentedGroup mySwitch;
     MediaPlayer mp3Dennied;
     MediaPlayer mp3Permitted;
     MediaPlayer mp3Error;
-    DatabaseHelper db = new DatabaseHelper(this);
+    private TransitionDrawable trans;
+    private RadioButton in;
+    private RadioButton out;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,18 +120,10 @@ public class MainActivity extends AppCompatActivity {
 
         //remove it
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "something", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                mVibrator.vibrate(100);
-            }
-        });
 
         // Get initial setup
         new getSetupTask().execute();
-        
+
         //create the log file
         File log = new File(this.getFilesDir() + File.separator + "AccessControl.log");
         if (!log.isFile()) {
@@ -133,11 +133,11 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        
+
         //call the loading library in xml file
         loading = (ProgressWheel) findViewById(R.id.loading);
         loading.setVisibility(View.GONE);
-        
+
         // Start Asynctask loop to check every delayPeople time, if need update people.
         updatePeople();
         // Asynctask to start sending records to each delayRecords time to API.
@@ -153,37 +153,42 @@ public class MainActivity extends AppCompatActivity {
         mp3Permitted = MediaPlayer.create(MainActivity.this, R.raw.good);
         mp3Error = MediaPlayer.create(MainActivity.this, R.raw.error);
         textViewCompany.setVisibility(View.GONE);
-        mySwitch = (Switch) findViewById(R.id.mySwitch);
-        mySwitch.setChecked(true);
+        mySwitch = (SegmentedGroup) findViewById(R.id.segmented2);
         textViewVersion = (TextView) findViewById(R.id.textView_version);
-        textViewVersion.setText("Versión: " + version);
+        in = (RadioButton) findViewById(R.id.in);
+        out = (RadioButton) findViewById(R.id.out);
+        //textViewVersion.setText("Versión: " + version);
 
         // set by default
         is_input = true;
+        in.toggle();
 
-        mySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mySwitch.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    is_input = true;
-                } else {
-                    is_input = false;
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.in:
+                        is_input = true;
+                        break;
+                    case R.id.out:
+                        is_input = false;
+                        break;
                 }
             }
         });
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (editTextRun.getText().toString().isEmpty()) {
-                    editTextRun.setHint("Ingrese Rut");
-                    editTextRun.setHintTextColor(Color.RED);
-                    editTextRun.requestFocus();
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(editTextRun, InputMethodManager.SHOW_IMPLICIT);
-                } else getPerson(editTextRun.getText().toString());
-            }
-        });
+        if (fab != null)
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (editTextRun.getText().toString().isEmpty()) {
+                        editTextRun.setHint("Ingrese Rut");
+                        editTextRun.setHintTextColor(Color.RED);
+                        editTextRun.requestFocus();
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(editTextRun, InputMethodManager.SHOW_IMPLICIT);
+                    } else getPerson(editTextRun.getText().toString());
+                }
+            });
 
     }
 
@@ -291,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Dictionary of MD5 hashes, each one executes a task.
+     *
      * @param barcodeStr Hash MD5
      *                   Sync offline registers,
      *                   get total of registers,
@@ -303,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
      *                   call log viewer fragment.
      */
     private void SetUp(String barcodeStr) {
+        DatabaseHelper db = DatabaseHelper.getInstance(this);
         switch (barcodeStr) {
             case "CONFIG-AXX-637B55B8AA55C7C7D3810E0CE05B1E80":
                 // Offline record Syncronize
@@ -405,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(mScanReceiver, filter);
     }
 
-    public void cleanEditText(){
+    public void cleanEditText() {
         editTextRun.setText("");
         textViewName.setText("");
         textViewCompany.setText("");
@@ -434,8 +441,8 @@ public class MainActivity extends AppCompatActivity {
                             // First call, postRecordsInstance will be null, so instantiate it.
                             if (postRecordsInstance == null) {
                                 postRecords();
-                            } else if (db.record_desync_count() > 0 && 
-                                    postRecordsInstance.getStatus() != AsyncTask.Status.RUNNING){
+                            } else if (db.record_desync_count() > 0 &&
+                                    postRecordsInstance.getStatus() != AsyncTask.Status.RUNNING) {
                                 // If it is already instantiated
                                 postRecords();
                             }
@@ -480,14 +487,16 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Get information about one person from local database (sqlite) and
      * Build a record object to be insert into local database as register (event)
+     *
      * @param rut
      */
     public void getPerson(String rut) {
         log_app log = new log_app();
         DatabaseHelper db = DatabaseHelper.getInstance(this);
         Cursor person = db.get_one_person(rut);
-
-        textViewCompany.setVisibility(View.GONE);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.layout_ticks);
+        //textViewCompany.setVisibility(View.GONE);
+        Resources res = this.getResources();
 
         try {
             //build object with that values, then send to registerTarsk()
@@ -497,36 +506,47 @@ public class MainActivity extends AppCompatActivity {
             if (person.getCount() < 1) {
                 new loadSound(3).execute();
                 editTextRun.setText(rut);
-                editTextRun.setVisibility(View.VISIBLE);
+                //editTextRun.setVisibility(View.VISIBLE);
                 record.setRecord_person_rut(rut);
-                if (is_input)
-                    imageview.setImageResource(R.drawable.dennied);
+                trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
+                layout.setBackgroundDrawable(trans);
+                trans.reverseTransition(150);
+                imageview.setImageResource(R.drawable.xbutton);
             } else {
                 record.setPerson_mongo_id(person.getString(person.getColumnIndex("person_mongo_id")));
                 if (person.getString(person.getColumnIndex("person_active")).equals("true")) {
                     new loadSound(2).execute();
-                    editTextRun.setVisibility(View.GONE);
-                    if (is_input)
-                        imageview.setImageResource(R.drawable.permitted);
+                    //  editTextRun.setVisibility(View.GONE);
+                    if (is_input) {
+                        editTextRun.setText(rut);
+                        trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_true);
+                        layout.setBackgroundDrawable(trans);
+                        trans.reverseTransition(150);
+                        imageview.setImageResource(R.drawable.checked);
+                    }
                 } else {
                     new loadSound(3).execute();
-                    editTextRun.setVisibility(View.VISIBLE);
-                    if (is_input)
-                        imageview.setImageResource(R.drawable.dennied);
+                    //editTextRun.setVisibility(View.VISIBLE);
+                    if (is_input) {
+                        trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
+                        layout.setBackgroundDrawable(trans);
+                        trans.reverseTransition(150);
+                        imageview.setImageResource(R.drawable.xbutton);
+                    }
                 }
 
                 switch (person.getString(person.getColumnIndex("person_type"))) {
                     case "staff":
                         textViewName.setText(person.getString(person.getColumnIndex("person_name")));
                         textViewProfile.setText("Empleado");
-                        textViewCompany.setVisibility(View.GONE);
-                        editTextRun.setVisibility(View.GONE);
+                        //textViewCompany.setVisibility(View.GONE);
+                        //editTextRun.setVisibility(View.GONE);
                         break;
                     case "contractor":
                         textViewName.setText(person.getString(person.getColumnIndex("person_name")));
                         textViewProfile.setText("Subcontratista");
                         textViewCompany.setText(person.getString(person.getColumnIndex("person_company")));
-                        textViewCompany.setVisibility(View.VISIBLE);
+                        //textViewCompany.setVisibility(View.VISIBLE);
                         break;
                     case "visitor":
                         textViewProfile.setText("Visita");
@@ -541,9 +561,9 @@ public class MainActivity extends AppCompatActivity {
                             // If have company show it.
                             if (!person.getString(person.getColumnIndex("person_company")).isEmpty()) {
                                 textViewCompany.setText(person.getString(person.getColumnIndex("person_company")));
-                                textViewCompany.setVisibility(View.VISIBLE);
+                                //      textViewCompany.setVisibility(View.VISIBLE);
                             } else {
-                                textViewCompany.setVisibility(View.GONE);
+                                //    textViewCompany.setVisibility(View.GONE);
                             }
                         } catch (NullPointerException npe) {
                             textViewName.setText("");
@@ -619,10 +639,10 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Generate a session and token on API and
      * Get from API, the company and sector related with to this PDA.
-     *
+     * <p>
      * This is a basic (necessary) data to traffic data with API.
      */
-    public class getSetupTask extends AsyncTask<String, String, String>{
+    public class getSetupTask extends AsyncTask<String, String, String> {
 
         private Exception exception;
         InputStream inputStream;
@@ -663,7 +683,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             String serialNumber = Build.SERIAL;
                             json = httpGet(server + "/api/pdas/" + serialNumber);
-                            if (!json.equals("408")){
+                            if (!json.equals("408")) {
                                 JSONArray json_array;
                                 json_array = new JSONArray(json);
                                 // Set global vars
@@ -695,7 +715,7 @@ public class MainActivity extends AppCompatActivity {
      * Make a background call to httpGet which,
      * using the url sent as parameter
      * returns the json sent by the API as a string
-     *
+     * <p>
      * OnPostExecute, Sends the json obtained as parameter
      * to the add_people method of the databaseHelper class
      * to be inserted into the local database
@@ -708,22 +728,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /**
-         *  Do a http get to obtain an array json with people.
+         * Do a http get to obtain an array json with people.
+         *
          * @param params not used.
          * @return a http get response, its an array json.
          */
         protected String doInBackground(String... params) {
-            if(token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
+            if (token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
             else return httpGet(server + "/api/companies/" + idCompany + "/persons");
         }
 
         /**
          * Send to the dataBaseHelper the json Array it receives,
          * to insert it into the local database (sqlite).
+         *
          * @param json
          */
         protected void onPostExecute(String json) {
-             // When response its 200, json save data no code.
+            // When response its 200, json save data no code.
+            DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());
             if (json != "408" && json != "204") {
                 try {
                     db.add_people(json);
@@ -737,6 +760,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Do a HTTP get request.
+     *
      * @param dataUrl
      * @return http get response as string.
      */
@@ -771,7 +795,9 @@ public class MainActivity extends AppCompatActivity {
                 contentAsString = "408"; // Request Timeout
             }
             if (connection != null) connection.disconnect();
-            if (contentAsString.length() <= 2) { contentAsString = "204"; }// No content
+            if (contentAsString.length() <= 2) {
+                contentAsString = "204";
+            }// No content
         } else Log.e("Error", "Token missing");
         return contentAsString;
     }
@@ -800,8 +826,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Do a HTTP post to posted a register to API.
+     *
      * @param record object, contain data to build json.
-     * @param url endpoint to receive a json.
+     * @param url    endpoint to receive a json.
      * @param client Http client library.
      */
     public void httpPost(Record record, String url, OkHttpClient client) {
@@ -830,10 +857,10 @@ public class MainActivity extends AppCompatActivity {
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Accept", "application/json")
-                    .addHeader("Cache-Control","no-cache,no-store,max-age=0,must-revalidate")
-                    .addHeader("Pragma","no-cache")
-                    .addHeader("Expires","-1")
-                    .addHeader("X-Content-Type-Options","nosniff")
+                    .addHeader("Cache-Control", "no-cache,no-store,max-age=0,must-revalidate")
+                    .addHeader("Pragma", "no-cache")
+                    .addHeader("Expires", "-1")
+                    .addHeader("X-Content-Type-Options", "nosniff")
                     .addHeader("Content-type", "application/json")
                     .addHeader("Authorization", "Bearer " + token)
                     .post(body)
@@ -871,6 +898,7 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * Rove the list of offline records and each sends an obj record to the method httpPost()
+         *
          * @param params Record type list
          * @return Always null.
          */

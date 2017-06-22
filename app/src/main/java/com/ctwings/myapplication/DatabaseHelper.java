@@ -335,7 +335,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
                 cursor.moveToNext();
             }
-            cursor.close();
         } catch (Exception e) {
             log.writeLog(context, "DBhelper:line 238", "ERROR", e.getMessage());
             e.printStackTrace();

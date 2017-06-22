@@ -29,5 +29,7 @@ dependencies {
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     compile 'com.pnikosis:materialish-progress:1.7'
     compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+    compile 'info.hoang8f:android-segmented:1.0.6'
     testCompile 'junit:junit:4.12'
 }

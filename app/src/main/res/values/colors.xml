@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#466979</color>
+    <color name="colorPrimaryDark">#c6a700</color>
+    <color name="colorAccent">#648393</color>
+    <color name="colortest">#658696</color>
+    <color name="colortest1">#e1e1e1</color>
+    <color name="redColor">#e21b1b</color>
+    <color name="greenColor">#32ba7c</color>
+    <color name="marronColor">#e1e1e1</color>
+    <color name="radio_button_selected_color">#466979</color>
+    <color name="radio_button_unselected_color">#e1e1e1</color>
 </resources>
