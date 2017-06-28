@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.device.ScanManager;
@@ -46,6 +48,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -74,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
 
     private final int delayPeople = 10000; // 4 Min. 240000; 600000 10 min
     private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
-    //private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
+    private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
-    private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
+    //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
     private String idCompany = "";
     private String idSector = "";
     private String token = "";
@@ -88,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageview;
     private EditText editTextRun;
     private TextView textViewName;
-    private TextView textViewVersion;
     private String name = "";
     private TextView textViewCompany;
     private TextView textViewProfile;
@@ -139,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         loading.setVisibility(View.GONE);
 
         // Start Asynctask loop to check every delayPeople time, if need update people.
-        updatePeople();
+        //updatePeople();
         // Asynctask to start sending records to each delayRecords time to API.
         updateRecords();
 
@@ -154,10 +156,8 @@ public class MainActivity extends AppCompatActivity {
         mp3Error = MediaPlayer.create(MainActivity.this, R.raw.error);
         textViewCompany.setVisibility(View.GONE);
         mySwitch = (SegmentedGroup) findViewById(R.id.segmented2);
-        textViewVersion = (TextView) findViewById(R.id.textView_version);
         in = (RadioButton) findViewById(R.id.in);
         out = (RadioButton) findViewById(R.id.out);
-        //textViewVersion.setText("Versión: " + version);
 
         // set by default
         is_input = true;
@@ -212,6 +212,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_setting) {
             Intent i = new Intent(this, Setting.class);
+            startActivity(i);
+        }else if (id == R.id.action_aboutUs) {
+            Intent i = new Intent(this, aboutUS.class);
             startActivity(i);
         }
 
@@ -474,6 +477,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             getPeopleInstance = new getPeopleTask();
                             getPeopleInstance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            Log.i("asyntask people","token: "+token+" idcompany: "+idCompany+" idSector"+idSector);
                         } catch (Exception e) {
                             log.writeLog(getApplicationContext(), "Main:line 397", "ERROR", e.getMessage());
                         }
@@ -645,44 +649,60 @@ public class MainActivity extends AppCompatActivity {
     public class getSetupTask extends AsyncTask<String, String, String> {
 
         private Exception exception;
-        InputStream inputStream;
+        String responseBody;
         String url = server + "/auth/local";
+
+        final OkHttpClient clientget = new OkHttpClient.Builder()
+                .connectTimeout(2, TimeUnit.SECONDS)
+                .writeTimeout(0, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS)
+                .build();
 
         @Override
         protected String doInBackground(String... params) {
             log_app log = new log_app();
             String json = "{}";
             String result = "";
+            String post = "";
             JSONObject jsonObject = new JSONObject();
-            HttpClient httpclient = new DefaultHttpClient();
+            final OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(2, TimeUnit.SECONDS)
+                    .writeTimeout(0, TimeUnit.SECONDS)
+                    .readTimeout(0, TimeUnit.SECONDS)
+                    .build();
+            final MediaType JSON
+                    = MediaType.parse("application/json; charset=utf-8");
 
             // Retrieve TOKEN
             try {
-                HttpPost httpPost = new HttpPost(url);
-
+                //accumulate post
                 jsonObject.accumulate("rut", "supervisor");
                 jsonObject.accumulate("password", "supervisor");
 
-                StringEntity se = new StringEntity(jsonObject.toString());
-                httpPost.setEntity(se);
+                //create body object
+                json = jsonObject.toString();
+                RequestBody body = RequestBody.create(JSON, json);
 
-                httpPost.setHeader("Accept", "application/json");
-                httpPost.setHeader("Content-type", "application/json");
+                //create object okhttp
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Accept", "application/json")
+                        .addHeader("Content-type", "application/json")
+                        .post(body)
+                        .build();
 
-                HttpResponse httpResponse = httpclient.execute(httpPost);
-                inputStream = httpResponse.getEntity().getContent();
-
-                if (inputStream != null) {
-                    result = convertInputStreamToString(inputStream);
-                    if (httpResponse.getStatusLine().getStatusCode() == 200) {
-                        //token = result;
+                Response response = client.newCall(request).execute();
+                responseBody = response.body().string();
+                if (responseBody != null) {
+                    if (response.isSuccessful()) {
+                        result = responseBody;
                         JSONObject jsonToken = new JSONObject(result);
                         token = jsonToken.getString("token");
 
                         // Retrieve the company, and sector
                         try {
                             String serialNumber = Build.SERIAL;
-                            json = httpGet(server + "/api/pdas/" + serialNumber);
+                            json = httpGet(server + "/api/pdas/" + serialNumber, clientget);
                             if (!json.equals("408")) {
                                 JSONArray json_array;
                                 json_array = new JSONArray(json);
@@ -696,7 +716,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 } else {
-                    result = String.valueOf(httpResponse.getStatusLine().getStatusCode());
+                    result = String.valueOf(response.code());
                 }
                 //result its the json to sent
                 if (result.startsWith("http://")) result = "204"; //no content
@@ -722,6 +742,12 @@ public class MainActivity extends AppCompatActivity {
      */
     public class getPeopleTask extends AsyncTask<String, String, String> {
 
+        final OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(2, TimeUnit.SECONDS)
+                .writeTimeout(0, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS)
+                .build();
+
         protected void onPreExecute() {
             loading.setSpinSpeed(3);
             loading.setVisibility(View.VISIBLE);
@@ -734,8 +760,11 @@ public class MainActivity extends AppCompatActivity {
          * @return a http get response, its an array json.
          */
         protected String doInBackground(String... params) {
+            Log.e("token",token);
+            Log.e("idCompany",idCompany);
+            Log.e("idSector",idSector);
             if (token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
-            else return httpGet(server + "/api/companies/" + idCompany + "/persons");
+            else return httpGet(server + "/api/companies/" + idCompany + "/persons", client);
         }
 
         /**
@@ -764,37 +793,35 @@ public class MainActivity extends AppCompatActivity {
      * @param dataUrl
      * @return http get response as string.
      */
-    public String httpGet(String dataUrl) {
-
+    public String httpGet(String dataUrl, OkHttpClient client) {
         String contentAsString = "";
         URL url;
-        HttpURLConnection connection = null;
-
         if (!token.equals("")) {
             try {
                 // Create connection
                 url = new URL(dataUrl);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-
-                // Setting headers
-                connection.setRequestProperty("Authorization", "Bearer " + token);
-                connection.setRequestProperty("Accept", "application/json");
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setConnectTimeout(2000);
-                connection.connect();
-
-                int response = connection.getResponseCode();
-
-                // Get Response
-                InputStream is = connection.getInputStream();
-                if (response != 200) contentAsString = String.valueOf(response);
-                else contentAsString = convertInputStreamToString(is);
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer " + token)
+                        .addHeader("Accept", "application/json")
+                        .addHeader("Content-Type", "application/json")
+                        .get()
+                        .build();
+                Response response = null;
+                //get response to server
+                response = client.newCall(request).execute();
+                if (response != null) {
+                    Log.e("content before", contentAsString);
+                    contentAsString = response.body().string();
+                    Log.e("content", contentAsString);
+                } else
+                    contentAsString = response.code() + "";
+                if (response != null)
+                    response.close();
             } catch (Exception e) {
                 e.printStackTrace();
                 contentAsString = "408"; // Request Timeout
             }
-            if (connection != null) connection.disconnect();
             if (contentAsString.length() <= 2) {
                 contentAsString = "204";
             }// No content
@@ -924,5 +951,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void makeToast(String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public static String getApplicationVersionString(Context context) {
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo info = pm.getPackageInfo(context.getPackageName(), 0);
+            return "v" + info.versionName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

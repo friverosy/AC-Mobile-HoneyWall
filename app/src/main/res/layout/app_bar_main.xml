@@ -50,12 +50,4 @@
         wheel:matProg_barColor="#3F51B5"
         wheel:matProg_progressIndeterminate="true" />
 
-    <TextView
-        android:layout_width="138dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/textView_version"
-        android:layout_gravity="bottom|center"
-        android:alpha="204" />
-
 </android.support.design.widget.CoordinatorLayout>
