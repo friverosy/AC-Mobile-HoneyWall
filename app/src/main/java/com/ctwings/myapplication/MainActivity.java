@@ -520,23 +520,17 @@ public class MainActivity extends AppCompatActivity {
                 record.setPerson_mongo_id(person.getString(person.getColumnIndex("person_mongo_id")));
                 if (person.getString(person.getColumnIndex("person_active")).equals("true")) {
                     new loadSound(2).execute();
-                    //  editTextRun.setVisibility(View.GONE);
-                    if (is_input) {
-                        editTextRun.setText(rut);
-                        trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_true);
-                        layout.setBackgroundDrawable(trans);
-                        trans.reverseTransition(150);
-                        imageview.setImageResource(R.drawable.checked);
-                    }
+                    editTextRun.setText(rut);
+                    trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_true);
+                    layout.setBackgroundDrawable(trans);
+                    trans.reverseTransition(150);
+                    imageview.setImageResource(R.drawable.checked);
                 } else {
                     new loadSound(3).execute();
-                    //editTextRun.setVisibility(View.VISIBLE);
-                    if (is_input) {
-                        trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
-                        layout.setBackgroundDrawable(trans);
-                        trans.reverseTransition(150);
-                        imageview.setImageResource(R.drawable.xbutton);
-                    }
+                    trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
+                    layout.setBackgroundDrawable(trans);
+                    trans.reverseTransition(150);
+                    imageview.setImageResource(R.drawable.xbutton);
                 }
 
                 switch (person.getString(person.getColumnIndex("person_type"))) {
