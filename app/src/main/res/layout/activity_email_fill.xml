@@ -36,7 +36,7 @@
         android:layout_marginTop="25dp"
         android:background="@android:color/white"
         android:ems="10"
-        android:lines="10"
+        android:lines="8"
         android:gravity="center"
         android:hint="Ingrese Mensaje aqui"
         android:inputType="textMultiLine" />
@@ -45,6 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enviar Mail"
+        android:textColor="@android:color/white"
         android:background="@drawable/button_background"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"

@@ -28,7 +28,7 @@ public class email_fill extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (!subject.getText().toString().isEmpty()) {
-                    if (message.getText().toString().isEmpty()) {
+                    if (!message.getText().toString().isEmpty()) {
                         sendEmail();
                     } else
                         message.setError("Este campo es requerido");
