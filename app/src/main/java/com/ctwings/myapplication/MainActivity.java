@@ -75,7 +75,7 @@ import okhttp3.Response;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private final int delayPeople = 10000; // 4 Min. 240000; 600000 10 min
+    private final int delayPeople = 20000; // 4 Min. 240000; 600000 10 min
     private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
     private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         loading.setVisibility(View.GONE);
 
         // Start Asynctask loop to check every delayPeople time, if need update people.
-        //updatePeople();
+        updatePeople();
         // Asynctask to start sending records to each delayRecords time to API.
         updateRecords();
 
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_setting) {
             Intent i = new Intent(this, Setting.class);
             startActivity(i);
-        }else if (id == R.id.action_aboutUs) {
+        } else if (id == R.id.action_aboutUs) {
             Intent i = new Intent(this, aboutUS.class);
             startActivity(i);
         }
@@ -477,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             getPeopleInstance = new getPeopleTask();
                             getPeopleInstance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            Log.i("asyntask people","token: "+token+" idcompany: "+idCompany+" idSector"+idSector);
+                            Log.i("asyntask people", "token: " + token + " idcompany: " + idCompany + " idSector" + idSector);
                         } catch (Exception e) {
                             log.writeLog(getApplicationContext(), "Main:line 397", "ERROR", e.getMessage());
                         }
@@ -576,8 +576,8 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
-
-            person.close();
+            if (person != null)
+                person.close();
 
             record.setRecord_sync(0);
             record.setRecord_date(new Date().getTime());
@@ -760,9 +760,9 @@ public class MainActivity extends AppCompatActivity {
          * @return a http get response, its an array json.
          */
         protected String doInBackground(String... params) {
-            Log.e("token",token);
-            Log.e("idCompany",idCompany);
-            Log.e("idSector",idSector);
+            Log.e("token", token);
+            Log.e("idCompany", idCompany);
+            Log.e("idSector", idSector);
             if (token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
             else return httpGet(server + "/api/companies/" + idCompany + "/persons", client);
         }
@@ -811,7 +811,6 @@ public class MainActivity extends AppCompatActivity {
                 //get response to server
                 response = client.newCall(request).execute();
                 if (response != null) {
-                    Log.e("content before", contentAsString);
                     contentAsString = response.body().string();
                     Log.e("content", contentAsString);
                 } else

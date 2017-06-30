@@ -145,8 +145,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         log_app log = new log_app();
         JSONArray json_db_array;
         SQLiteDatabase db = this.getWritableDatabase();
-        DatabaseUtils.InsertHelper iHelp = new DatabaseUtils.InsertHelper(db, TABLE_PERSON);
-
         db.beginTransaction();
         try {
             json_db_array = new JSONArray(json);
@@ -159,6 +157,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String sCompanyName;
 
             for (int i = 0; i < json_db_array.length(); i++) {
+                DatabaseUtils.InsertHelper iHelp = new DatabaseUtils.InsertHelper(db, TABLE_PERSON);
                 iHelp.prepareForInsert();
                 try {
 
@@ -202,6 +201,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             break;
                     }
                     iHelp.execute();
+                    iHelp.close();
                 } catch (Exception e) {
                     Log.e("json", json_db_array.getJSONObject(i).toString());
                     Log.e("ERROR", e.getMessage());
@@ -350,6 +350,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT " + RECORD_ID + " FROM " + TABLE_RECORD +
                 " WHERE " + RECORD_SYNC + " = 0;", null);
         int count = cursor == null?0:cursor.getCount();
+        if(cursor!=null)
+            cursor.close();
         return count;
     }
 
@@ -357,6 +359,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT " + PERSON_ID + " FROM " + TABLE_PERSON, null);
         int count = cursor == null?0:cursor.getCount();
+        if(cursor!=null)
+            cursor.close();
         return count;
     }
 
@@ -365,6 +369,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT " + PERSON_ID + " FROM " + TABLE_PERSON +
                 " WHERE " + PERSON_TYPE + " = 'staff';", null);
         int count = cursor == null?0:cursor.getCount();
+        if(cursor!=null)
+            cursor.close();
         return count;
     }
 
@@ -373,6 +379,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT " + PERSON_ID + " FROM " + TABLE_PERSON + " " +
                 "WHERE " + PERSON_TYPE + " = 'contractor';", null);
         int count = cursor == null?0:cursor.getCount();
+        if(cursor!=null)
+            cursor.close();
         return count;
     }
 
@@ -381,6 +389,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT " + PERSON_ID + " FROM " + TABLE_PERSON + " " +
                 "WHERE " + PERSON_TYPE + " = 'visitor';", null);
         int count = cursor == null?0:cursor.getCount();
+        if(cursor!=null)
+            cursor.close();
         return count;
     }
 
@@ -413,17 +423,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor get_config() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SETTING, null);
+        if(cursor!=null)
+            cursor.close();
         return cursor;
     }
 
     public int get_config_id_pda() {
         SQLiteDatabase db = this.getWritableDatabase();
+        int count=0;
         Cursor cursor = db.rawQuery("SELECT id_pda FROM " + TABLE_SETTING, null);
         if (cursor.moveToFirst()) {
-            return cursor.getInt(cursor.getColumnIndex("id_pda"));
-        } else {
-            return 0;
+            count= cursor.getInt(cursor.getColumnIndex("id_pda"));
         }
+        if(cursor!=null)
+            cursor.close();
+        return count;
     }
 
     public void set_config_id_pda(int id) {
