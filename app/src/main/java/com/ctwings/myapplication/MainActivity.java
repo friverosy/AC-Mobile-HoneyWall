@@ -74,7 +74,7 @@ import okhttp3.Response;
  * Handle register and people. Have the main business logic.
  */
 public class MainActivity extends AppCompatActivity {
-
+    
     private final int delayPeople = 20000; // 4 Min. 240000; 600000 10 min
     private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
     private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
@@ -263,7 +263,6 @@ public class MainActivity extends AppCompatActivity {
                         barcodeStr = barcodeStr.substring(0, barcodeStr.indexOf("-"));
                     }
                 } else if (barcodeType == 1 || barcodeStr.startsWith("00")) {
-                    //Log.i("Debugger", "CARD");
                 } else if (barcodeType == 17) { // PDF417
                     String rutValidator = barcodeStr.substring(0, 8);
                     rutValidator = rutValidator.replace(" ", "");
@@ -520,23 +519,17 @@ public class MainActivity extends AppCompatActivity {
                 record.setPerson_mongo_id(person.getString(person.getColumnIndex("person_mongo_id")));
                 if (person.getString(person.getColumnIndex("person_active")).equals("true")) {
                     new loadSound(2).execute();
-                    //  editTextRun.setVisibility(View.GONE);
-                    if (is_input) {
-                        editTextRun.setText(rut);
-                        trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_true);
-                        layout.setBackgroundDrawable(trans);
-                        trans.reverseTransition(150);
-                        imageview.setImageResource(R.drawable.checked);
-                    }
+                    editTextRun.setText(rut);
+                    trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_true);
+                    layout.setBackgroundDrawable(trans);
+                    trans.reverseTransition(150);
+                    imageview.setImageResource(R.drawable.checked);
                 } else {
                     new loadSound(3).execute();
-                    //editTextRun.setVisibility(View.VISIBLE);
-                    if (is_input) {
-                        trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
-                        layout.setBackgroundDrawable(trans);
-                        trans.reverseTransition(150);
-                        imageview.setImageResource(R.drawable.xbutton);
-                    }
+                    trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
+                    layout.setBackgroundDrawable(trans);
+                    trans.reverseTransition(150);
+                    imageview.setImageResource(R.drawable.xbutton);
                 }
 
                 switch (person.getString(person.getColumnIndex("person_type"))) {
@@ -775,6 +768,7 @@ public class MainActivity extends AppCompatActivity {
          */
         protected void onPostExecute(String json) {
             // When response its 200, json save data no code.
+            Log.d("people", json);
             DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());
             if (json != "408" && json != "204") {
                 try {
@@ -812,7 +806,6 @@ public class MainActivity extends AppCompatActivity {
                 response = client.newCall(request).execute();
                 if (response != null) {
                     contentAsString = response.body().string();
-                    Log.e("content", contentAsString);
                 } else
                     contentAsString = response.code() + "";
                 if (response != null)
