@@ -16,7 +16,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class log_app {
-    private static final String LOG_NAME = "MultiExport.log";
+    private static final String LOG_NAME = "Multiempresa.log";
     private String logType;
     private String content;
 

@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class log_show extends AppCompatActivity {
-    private static final String LOG_NAME = "MultiExport.log";
+    private static final String LOG_NAME = "Multiempresa.log";
     private String logType;
     private TextView showlog;
     private StringBuilder text = new StringBuilder();
