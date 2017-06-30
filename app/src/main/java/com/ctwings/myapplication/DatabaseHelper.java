@@ -169,7 +169,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         sRut = sRut.substring(0,pos);
                     }
 
-                    iHelp.bind(iHelp.getColumnIndex(PERSON_RUT),sRut);
+                    iHelp.bind(iHelp.getColumnIndex(PERSON_RUT), sRut);
                     iHelp.bind(iHelp.getColumnIndex(PERSON_TYPE), json_db_array.getJSONObject(i).getString("type"));
 
                     sMongoPresonId = json_db_array.getJSONObject(i).getString("_id");
@@ -185,12 +185,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         case "staff": // Employee
                             iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
                             iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), sCompanyName);
-                            iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
+                            if (json_db_array.getJSONObject(i).getString("card") != null)
+                                iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
                             break;
                         case "contractor": // Contactor
                             iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
                             iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), sCompanyName);
-                            iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
+                            if (json_db_array.getJSONObject(i).getString("card") != null)
+                                iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
                             break;
                         case "visitor": // Visit
                             if (!json_db_array.getJSONObject(i).getString("name").isEmpty())
