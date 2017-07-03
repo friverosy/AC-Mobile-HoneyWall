@@ -151,11 +151,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.delete(TABLE_PERSON,null,null);
             String sRut;
             int pos;
-            String sMongoPresonId;
-            String sCompany;
-            JSONObject jCompany;
-            String sCompanyName;
-
+            String sMongoPersonId;
             for (int i = 0; i < json_db_array.length(); i++) {
                 DatabaseUtils.InsertHelper iHelp = new DatabaseUtils.InsertHelper(db, TABLE_PERSON);
                 iHelp.prepareForInsert();
@@ -170,34 +166,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                     iHelp.bind(iHelp.getColumnIndex(PERSON_RUT), sRut);
                     iHelp.bind(iHelp.getColumnIndex(PERSON_TYPE), json_db_array.getJSONObject(i).getString("type"));
-
-                    sMongoPresonId = json_db_array.getJSONObject(i).getString("_id");
-
-                    sCompany = json_db_array.getJSONObject(i).getString("company");
-                    jCompany = new JSONObject(sCompany);
-                    sCompanyName  = jCompany.getString("name");
-
-                    iHelp.bind(iHelp.getColumnIndex(PERSON_MONGO_ID), sMongoPresonId);
+                    sMongoPersonId = json_db_array.getJSONObject(i).getString("_id");
+                    iHelp.bind(iHelp.getColumnIndex(PERSON_MONGO_ID), sMongoPersonId);
                     iHelp.bind(iHelp.getColumnIndex(PERSON_ACTIVE), json_db_array.getJSONObject(i).getString("active"));
 
                     switch (json_db_array.getJSONObject(i).getString("type")) {
                         case "staff": // Employee
                             iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
-                            iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), sCompanyName);
                             if (json_db_array.getJSONObject(i).getString("card") != null)
                                 iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
                             break;
                         case "contractor": // Contactor
                             iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
-                            iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), sCompanyName);
+                            try {
+                                iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), json_db_array.getJSONObject(i).getString("companyInfo"));
+                            } catch (JSONException e){
+                                //Do nothing.
+                            }
                             if (json_db_array.getJSONObject(i).getString("card") != null)
                                 iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
                             break;
                         case "visitor": // Visit
                             if (!json_db_array.getJSONObject(i).getString("name").isEmpty())
                                 iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
-                            if (!sCompanyName.isEmpty())
-                                iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), sCompanyName);
+                            try {
+                                iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), json_db_array.getJSONObject(i).getString("companyInfo"));
+                            } catch (JSONException e){
+                                //Do nothing.
+                            }
                             break;
                         default:
                             break;
@@ -216,9 +212,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } catch (IllegalStateException e) {
             e.printStackTrace();
             log.writeLog(context, "DBhelper:line 184", "ERROR", e.getMessage());
-        } catch (SQLiteDatabaseLockedException e) {
-            e.printStackTrace();
-            log.writeLog(context, "DBhelper:line 186", "ERROR", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             log.writeLog(context, "DBhelper:line 186", "ERROR", e.getMessage());

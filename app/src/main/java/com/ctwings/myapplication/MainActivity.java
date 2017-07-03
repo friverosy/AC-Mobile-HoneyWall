@@ -75,8 +75,8 @@ import okhttp3.Response;
  */
 public class MainActivity extends AppCompatActivity {
     
-    private final int delayPeople = 20000; // 4 Min. 240000; 600000 10 min
-    private final int delayRecords = 6000; // 4 Min. 240000; 480000 8 min
+    private final int delayPeople = 60000; // 1 Min.
+    private final int delayRecords = 5000; // 5 Seg
     private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
     //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
     private String idSector = "";
     private String token = "";
     private int pdaNumber;
-    private static String version = "cf0649f";
     private getPeopleTask getPeopleInstance;
     private postRecordsTask postRecordsInstance;
 
@@ -476,7 +475,6 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             getPeopleInstance = new getPeopleTask();
                             getPeopleInstance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            Log.i("asyntask people", "token: " + token + " idcompany: " + idCompany + " idSector" + idSector);
                         } catch (Exception e) {
                             log.writeLog(getApplicationContext(), "Main:line 397", "ERROR", e.getMessage());
                         }
@@ -510,22 +508,22 @@ public class MainActivity extends AppCompatActivity {
                 new loadSound(3).execute();
                 editTextRun.setText(rut);
                 //editTextRun.setVisibility(View.VISIBLE);
-                record.setRecord_person_rut(rut);
                 trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
                 layout.setBackgroundDrawable(trans);
                 trans.reverseTransition(150);
                 imageview.setImageResource(R.drawable.xbutton);
             } else {
-                record.setPerson_mongo_id(person.getString(person.getColumnIndex("person_mongo_id")));
                 if (person.getString(person.getColumnIndex("person_active")).equals("true")) {
                     new loadSound(2).execute();
                     editTextRun.setText(rut);
+                    record.setPerson_mongo_id(person.getString(person.getColumnIndex("person_mongo_id")));
                     trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_true);
                     layout.setBackgroundDrawable(trans);
                     trans.reverseTransition(150);
                     imageview.setImageResource(R.drawable.checked);
                 } else {
                     new loadSound(3).execute();
+                    record.setRecord_person_rut(person.getString(person.getColumnIndex("person_rut")));
                     trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
                     layout.setBackgroundDrawable(trans);
                     trans.reverseTransition(150);
@@ -753,9 +751,6 @@ public class MainActivity extends AppCompatActivity {
          * @return a http get response, its an array json.
          */
         protected String doInBackground(String... params) {
-            Log.e("token", token);
-            Log.e("idCompany", idCompany);
-            Log.e("idSector", idSector);
             if (token.equals("") || idCompany.equals("") || idSector.equals("")) return "204";
             else return httpGet(server + "/api/companies/" + idCompany + "/persons", client);
         }
@@ -768,7 +763,7 @@ public class MainActivity extends AppCompatActivity {
          */
         protected void onPostExecute(String json) {
             // When response its 200, json save data no code.
-            Log.d("people", json);
+            //Log.d("people", json);
             DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());
             if (json != "408" && json != "204") {
                 try {
@@ -868,7 +863,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Convert JSONObject to JSON to String
             json = jsonObject.toString();
-            Log.i("json to POST", json);
+            //Log.i("json to POST", json);
 
             RequestBody body = RequestBody.create(JSON, json);
 
