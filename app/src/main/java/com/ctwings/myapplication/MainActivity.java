@@ -77,11 +77,13 @@ public class MainActivity extends AppCompatActivity {
     
     private final int delayPeople = 60000; // 1 Min.
     private final int delayRecords = 5000; // 5 Seg
-    private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
+    private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
     //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
     private String idCompany = "";
+    private String companyName = "";
     private String idSector = "";
+    private String sectorName = "";
     private String token = "";
     private int pdaNumber;
     private getPeopleTask getPeopleInstance;
@@ -244,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
                 int barocodelen = intent.getIntExtra("length", 0);
                 byte barcodeType = intent.getByteExtra("barcodeType", (byte) 0);
                 barcodeStr = new String(barcode, 0, barocodelen);
-                String rawCode = barcodeStr;
+                //String rawCode = barcodeStr;
 
                 int flag = 0; // 0 for end without k, 1 with k
                 int flagSetUp = 0; // 0 for no config QR code.
@@ -287,10 +289,9 @@ public class MainActivity extends AppCompatActivity {
                 if (flagSetUp == 0)
                     getPerson(barcodeStr);
                 barcodeCache = barcodeStr; // Used to avoid 2 records in a row.
-            } catch (NullPointerException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
+                new postWebHookTask().execute("Error reading barcode", e.getMessage());
             }
         }
     };
@@ -450,6 +451,7 @@ public class MainActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                             log.writeLog(getApplicationContext(), "Main:line 419", "ERROR", e.getMessage());
+                            new postWebHookTask().execute("Error updating offline registers", e.getMessage());
                         }
                     }
                 });
@@ -477,6 +479,7 @@ public class MainActivity extends AppCompatActivity {
                             getPeopleInstance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         } catch (Exception e) {
                             log.writeLog(getApplicationContext(), "Main:line 397", "ERROR", e.getMessage());
+                            new postWebHookTask().execute("Error updating people", e.getMessage());
                         }
                     }
                 });
@@ -578,14 +581,11 @@ public class MainActivity extends AppCompatActivity {
 
             // Save record on local database
             db.add_record(record);
-        } catch (ArrayIndexOutOfBoundsException aiobe) {
-            new loadSound(1).execute(); // Error sound.
-            aiobe.printStackTrace();
-            log.writeLog(getApplicationContext(), "Main:line 538", "ERROR", aiobe.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             new loadSound(1).execute(); // Error sound.
-            log.writeLog(getApplicationContext(), "Main:line 542", "ERROR", e.getMessage());
+            log.writeLog(getApplicationContext(), "Main:line 592", "ERROR", e.getMessage());
+            new postWebHookTask().execute("Error updating getting a person", e.getMessage());
         }
     }
 
@@ -654,7 +654,6 @@ public class MainActivity extends AppCompatActivity {
             log_app log = new log_app();
             String json = "{}";
             String result = "";
-            String post = "";
             JSONObject jsonObject = new JSONObject();
             final OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(2, TimeUnit.SECONDS)
@@ -701,9 +700,22 @@ public class MainActivity extends AppCompatActivity {
                                 idCompany = json_array.getJSONObject(0).getString("company");
                                 idSector = json_array.getJSONObject(0).getString("sector");
                             }
-                        } catch (JSONException jex) {
-                            jex.printStackTrace();
-                            log.writeLog(getApplicationContext(), "Main:line 572", "ERROR", jex.getMessage());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            log.writeLog(getApplicationContext(), "Main:line 572", "ERROR", e.getMessage());
+                        }
+
+                        // Retrieve the company name and sector name
+                        try {
+                            String companyJson = httpGet(server + "/api/companies/" + idCompany, clientget);
+                            JSONObject company = new JSONObject(companyJson);
+                            companyName = company.getString("name");
+
+                            String sectorJson = httpGet(server + "/api/sectors/" + idSector, clientget);
+                            JSONObject sector = new JSONObject(sectorJson);
+                            sectorName = sector.getString("name");
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 } else {
@@ -768,8 +780,9 @@ public class MainActivity extends AppCompatActivity {
             if (json != "408" && json != "204") {
                 try {
                     db.add_people(json);
-                } catch (IllegalStateException ise) {
-                    ise.printStackTrace();
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                    new postWebHookTask().execute("Error adding people to local database", e.getMessage());
                 }
             }
             loading.setVisibility(View.GONE);
@@ -808,6 +821,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
                 contentAsString = "408"; // Request Timeout
+                new postWebHookTask().execute("Error doing http get", e.getMessage());
             }
             if (contentAsString.length() <= 2) {
                 contentAsString = "204";
@@ -889,9 +903,62 @@ public class MainActivity extends AppCompatActivity {
                     if (record.getRecord_sync() == 0) db.update_record(record.getRecord_id());
                 } else Log.e("tmp empty", bodyResponse);
             } else Log.e(response.message(), bodyResponse);
-        } catch (HttpHostConnectException hhc) {
-            hhc.printStackTrace();
-            log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", hhc.getMessage());
+        } catch (HttpHostConnectException e) {
+            e.printStackTrace();
+            log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", e.getMessage());
+            new postWebHookTask().execute("Error posting data", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", e.getMessage());
+            new postWebHookTask().execute("Error posting data", e.getMessage());
+        }
+    }
+
+    public void httpPost(String title, String message, OkHttpClient client) {
+        String json = "";
+        log_app log = new log_app();
+        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        final MediaType JSON
+                = MediaType.parse("application/json; charset=utf-8");
+        try {
+
+            jsonObject.put("title", "Stacktrace PDA " + Build.SERIAL);
+            jsonObject.put("color", "#FA5858");
+            jsonObject.put("author_name", sectorName);
+            jsonObject.put("pretext", title);
+            jsonObject.put("text", message);
+            jsonObject.put("footer", companyName);
+            jsonArray.put(jsonObject);
+
+            JSONObject mainObj = new JSONObject();
+            mainObj.put("attachments", jsonArray);
+
+            // Convert JSONObject to JSON to String
+            json = mainObj.toString();
+            Log.i("json to POST", json);
+
+            RequestBody body = RequestBody.create(JSON, json);
+
+            // Create object okhttp
+            Request request = new Request.Builder()
+                    .url("https://hooks.slack.com/services/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")
+                    .addHeader("Content-type", "application/json")
+                    .post(body)
+                    .build();
+
+            // Execute POST request to the given URL
+            Response response = client.newCall(request).execute();
+            String bodyResponse = response.body().string();
+            if (response.isSuccessful()) {
+                if (!bodyResponse.equals("{}")) {
+                    // Do something.
+                    Log.d("WebHook response", bodyResponse);
+                } else Log.e("tmp empty", bodyResponse);
+            } else Log.e(response.message(), bodyResponse);
+        } catch (HttpHostConnectException e) {
+            e.printStackTrace();
+            log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             log.writeLog(getApplicationContext(), "Main: POST method", "ERROR", e.getMessage());
@@ -932,6 +999,21 @@ public class MainActivity extends AppCompatActivity {
                     httpPost(record, server + "/api/sectors/" + idSector + "/registers/", client);
                 }
             }
+            return null;
+        }
+    }
+
+    public class postWebHookTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            final OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(1, TimeUnit.SECONDS)
+                    .writeTimeout(0, TimeUnit.SECONDS)
+                    .readTimeout(0, TimeUnit.SECONDS)
+                    .build();
+
+            httpPost(params[0], params[1], client);
             return null;
         }
     }
