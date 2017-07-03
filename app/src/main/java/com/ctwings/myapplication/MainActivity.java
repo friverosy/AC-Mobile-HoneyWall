@@ -525,6 +525,7 @@ public class MainActivity extends AppCompatActivity {
                     trans.reverseTransition(150);
                     imageview.setImageResource(R.drawable.checked);
                 } else {
+                    editTextRun.setText(rut);
                     new loadSound(3).execute();
                     trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
                     record.setRecord_person_rut(rut);
