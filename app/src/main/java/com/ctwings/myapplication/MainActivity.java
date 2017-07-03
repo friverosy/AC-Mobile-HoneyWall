@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     
     private final int delayPeople = 60000; // 1 Min.
     private final int delayRecords = 5000; // 5 Seg
-    private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Integration server
+    private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
     //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
     private String idCompany = "";
@@ -510,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
             if (person.getCount() < 1) {
                 new loadSound(3).execute();
                 editTextRun.setText(rut);
-                //editTextRun.setVisibility(View.VISIBLE);
+                record.setRecord_person_rut(rut);
                 trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
                 layout.setBackgroundDrawable(trans);
                 trans.reverseTransition(150);
@@ -526,8 +526,8 @@ public class MainActivity extends AppCompatActivity {
                     imageview.setImageResource(R.drawable.checked);
                 } else {
                     new loadSound(3).execute();
-                    record.setRecord_person_rut(person.getString(person.getColumnIndex("person_rut")));
                     trans = (TransitionDrawable) res.getDrawable(R.drawable.transition_color_denied);
+                    record.setRecord_person_rut(rut);
                     layout.setBackgroundDrawable(trans);
                     trans.reverseTransition(150);
                     imageview.setImageResource(R.drawable.xbutton);
@@ -544,7 +544,7 @@ public class MainActivity extends AppCompatActivity {
                         textViewName.setText(person.getString(person.getColumnIndex("person_name")));
                         textViewProfile.setText("Subcontratista");
                         textViewCompany.setText(person.getString(person.getColumnIndex("person_company")));
-                        //textViewCompany.setVisibility(View.VISIBLE);
+                        textViewCompany.setVisibility(View.VISIBLE);
                         break;
                     case "visitor":
                         textViewProfile.setText("Visita");
@@ -559,9 +559,9 @@ public class MainActivity extends AppCompatActivity {
                             // If have company show it.
                             if (!person.getString(person.getColumnIndex("person_company")).isEmpty()) {
                                 textViewCompany.setText(person.getString(person.getColumnIndex("person_company")));
-                                //      textViewCompany.setVisibility(View.VISIBLE);
+                                textViewCompany.setVisibility(View.VISIBLE);
                             } else {
-                                //    textViewCompany.setVisibility(View.GONE);
+                                textViewCompany.setVisibility(View.GONE);
                             }
                         } catch (NullPointerException npe) {
                             textViewName.setText("");
@@ -570,14 +570,15 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
-            if (person != null)
-                person.close();
 
             record.setRecord_sync(0);
             record.setRecord_date(new Date().getTime());
 
             if (is_input) record.setRecord_type("entry");
             else record.setRecord_type("depart");
+
+            if (person != null)
+                person.close();
 
             // Save record on local database
             db.add_record(record);
@@ -775,7 +776,6 @@ public class MainActivity extends AppCompatActivity {
          */
         protected void onPostExecute(String json) {
             // When response its 200, json save data no code.
-            //Log.d("people", json);
             DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());
             if (json != "408" && json != "204") {
                 try {
@@ -871,9 +871,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.accumulate("person", record.getPerson_mongo_id());
             jsonObject.accumulate("time", record.getRecord_date());
             jsonObject.accumulate("type", record.getRecord_type());
-
-            if (record.getRecord_person_rut() != null)
-                jsonObject.accumulate("rut", record.getRecord_person_rut());
+            jsonObject.accumulate("rut", record.getRecord_person_rut());
 
             // Convert JSONObject to JSON to String
             json = jsonObject.toString();
@@ -936,7 +934,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Convert JSONObject to JSON to String
             json = mainObj.toString();
-            Log.i("json to POST", json);
+            //Log.i("json to POST", json);
 
             RequestBody body = RequestBody.create(JSON, json);
 
@@ -951,10 +949,7 @@ public class MainActivity extends AppCompatActivity {
             Response response = client.newCall(request).execute();
             String bodyResponse = response.body().string();
             if (response.isSuccessful()) {
-                if (!bodyResponse.equals("{}")) {
-                    // Do something.
-                    Log.d("WebHook response", bodyResponse);
-                } else Log.e("tmp empty", bodyResponse);
+                // Do something.
             } else Log.e(response.message(), bodyResponse);
         } catch (HttpHostConnectException e) {
             e.printStackTrace();
