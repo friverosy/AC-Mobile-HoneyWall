@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
     
     private final int delayPeople = 60000; // 1 Min.
     private final int delayRecords = 5000; // 5 Seg
-    private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Integration server
+    //private static String server = "http://13.93.166.140:5001"; // Integration server
     //private static String server = "http://192.168.1.102:9000"; // Integration server
-    //private static String server = "http://axxezo-test.brazilsouth.cloudapp.azure.com:5001"; // Test server
+    private static String server = "http://axxezocloud.brazilsouth.cloudapp.azure.com:5001"; // Test server
     private String idCompany = "";
     private String companyName = "";
     private String idSector = "";
@@ -668,8 +668,8 @@ public class MainActivity extends AppCompatActivity {
             // Retrieve TOKEN
             try {
                 //accumulate post
-                jsonObject.accumulate("rut", "supervisor");
-                jsonObject.accumulate("password", "supervisor");
+                jsonObject.accumulate("rut", "mobileApp");
+                jsonObject.accumulate("password", "Hb9V&6Azz9fAGQV3L6wisF@5o%%vluuzE2nnVkGcD2JvxoT5BUDF5wqPoAs1K&dKftBA0911TsD@P!9B");
 
                 //create body object
                 json = jsonObject.toString();
