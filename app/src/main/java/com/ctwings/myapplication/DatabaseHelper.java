@@ -8,6 +8,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Debug;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -173,15 +174,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     switch (json_db_array.getJSONObject(i).getString("type")) {
                         case "staff": // Employee
                             iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
-                            if (json_db_array.getJSONObject(i).getString("card") != null)
+                            try{
                                 iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
+                            }catch (JSONException e){
+                                Log.d("No value for card", e.getMessage());
+                            }
                             break;
                         case "contractor": // Contactor
                             iHelp.bind(iHelp.getColumnIndex(PERSON_NAME), json_db_array.getJSONObject(i).getString("name"));
                             try {
                                 iHelp.bind(iHelp.getColumnIndex(PERSON_COMPANY), json_db_array.getJSONObject(i).getString("companyInfo"));
                             } catch (JSONException e){
-                                //Do nothing.
+                                Log.d("No value for compInfo", e.getMessage());
                             }
                             if (json_db_array.getJSONObject(i).getString("card") != null)
                                 iHelp.bind(iHelp.getColumnIndex(PERSON_CARD), json_db_array.getJSONObject(i).getString("card"));
